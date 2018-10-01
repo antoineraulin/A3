@@ -1,0 +1,9 @@
+Z:\dev\Visual Studio\A2\A2\bin\Debug\A2.exe.config
+Z:\dev\Visual Studio\A2\A2\bin\Debug\A2.exe
+Z:\dev\Visual Studio\A2\A2\bin\Debug\A2.pdb
+Z:\dev\Visual Studio\A2\A2\obj\Debug\A2.csprojAssemblyReference.cache
+Z:\dev\Visual Studio\A2\A2\obj\Debug\A2.csproj.CoreCompileInputs.cache
+Z:\dev\Visual Studio\A2\A2\obj\Debug\A2.exe
+Z:\dev\Visual Studio\A2\A2\obj\Debug\A2.pdb
+Z:\dev\Visual Studio\A2\A2\obj\Debug\Interop.IWshRuntimeLibrary.dll
+Z:\dev\Visual Studio\A2\A2\obj\Debug\A2.csproj.ResolveComReference.cache
