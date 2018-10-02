@@ -58,6 +58,7 @@ process.stdin.on("keypress", function (ch, key) {
 			cursorPos = cmdHistory[cmdHistory.length - pos].length - 1;
 		}
 	} else if (key && key.name == "left") {
+		try{
 		if (cursorPos - 1 >= 0) {
 			cliCursor.hide();
 			cursorPos = cursorPos - 1;
@@ -68,8 +69,9 @@ process.stdin.on("keypress", function (ch, key) {
 			process.stdout.clearLine();
 			process.stdout.cursorTo(0);
 			process.stdout.write(workingDir.bold.white + "> ".white + before + cc.bgWhite.black + after);
-		}
+		}}catch(e){}
 	} else if (key && key.name == "right") {
+		try{
 		if (cursorPos + 1 < cmdHistory[cmdHistory.length - pos].length - 1) {
 			cursorPos = cursorPos + 1;
 			var before = cmdHistory[cmdHistory.length - pos].slice(0, cursorPos);
@@ -87,6 +89,7 @@ process.stdin.on("keypress", function (ch, key) {
 			cliCursor.show();
 			cursorPos = cursorPos + 1;
 		}
+	}catch(e){}
 	} else if (key && key.name == "backspace") {
 		if (cursorPos != cmdHistory[cmdHistory.length - pos].length - 1) {
 			var before = cmdHistory[cmdHistory.length - pos].slice(0, cursorPos);
