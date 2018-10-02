@@ -3,6 +3,8 @@ const colors = require('colors');
 var keypress = require('keypress');
 keypress(process.stdin);
 var pos = 1;
+var cursorPos = 0;
+const cliCursor = require('cli-cursor');
 require('events').EventEmitter.setMaxListeners = 1;
 var workingDir = "";
 process.stdin.setRawMode(true);
@@ -45,6 +47,7 @@ process.stdin.on("keypress", function (ch, key) {
 			process.stdout.clearLine();
 			process.stdout.cursorTo(0);
 			process.stdout.write(workingDir.bold.white + "> ".white + cmdHistory[cmdHistory.length - pos]);
+			cursorPos = cmdHistory[cmdHistory.length - pos].length - 1;
 		}
 	} else if (key && key.name == "down") {
 		if (pos - 1 > 0) {
@@ -52,6 +55,58 @@ process.stdin.on("keypress", function (ch, key) {
 			process.stdout.clearLine();
 			process.stdout.cursorTo(0);
 			process.stdout.write(workingDir.bold.white + "> ".white + cmdHistory[cmdHistory.length - pos]);
+			cursorPos = cmdHistory[cmdHistory.length - pos].length - 1;
+		}
+	} else if (key && key.name == "left") {
+		if (cursorPos - 1 >= 0) {
+			cliCursor.hide();
+			cursorPos = cursorPos - 1;
+			var before = cmdHistory[cmdHistory.length - pos].slice(0, cursorPos);
+			var cc = cmdHistory[cmdHistory.length - pos][cursorPos];
+			var after = cmdHistory[cmdHistory.length - pos].slice(cursorPos + 1, cmdHistory[cmdHistory.length - pos.length - 1]);
+			cmdHistory[cmdHistory.length - pos] = before + cc + after;
+			process.stdout.clearLine();
+			process.stdout.cursorTo(0);
+			process.stdout.write(workingDir.bold.white + "> ".white + before + cc.bgWhite.black + after);
+		}
+	} else if (key && key.name == "right") {
+		if (cursorPos + 1 < cmdHistory[cmdHistory.length - pos].length - 1) {
+			cursorPos = cursorPos + 1;
+			var before = cmdHistory[cmdHistory.length - pos].slice(0, cursorPos);
+			var cc = cmdHistory[cmdHistory.length - pos][cursorPos];
+			var after = cmdHistory[cmdHistory.length - pos].slice(cursorPos + 1, cmdHistory[cmdHistory.length - pos.length - 1]);
+			cmdHistory[cmdHistory.length - pos] = before + cc + after;
+			process.stdout.clearLine();
+			process.stdout.cursorTo(0);
+			process.stdout.write(workingDir.bold.white + "> ".white + before + cc.bgWhite.black + after);
+
+		} else {
+			process.stdout.clearLine();
+			process.stdout.cursorTo(0);
+			process.stdout.write(workingDir.bold.white + "> ".white + cmdHistory[cmdHistory.length - pos]);
+			cliCursor.show();
+			cursorPos = cursorPos + 1;
+		}
+	} else if (key && key.name == "backspace") {
+		if (cursorPos != cmdHistory[cmdHistory.length - pos].length - 1) {
+			var before = cmdHistory[cmdHistory.length - pos].slice(0, cursorPos);
+			var after = cmdHistory[cmdHistory.length - pos].slice(cursorPos, cmdHistory[cmdHistory.length - pos.length - 1]);
+			before = before.slice(0, -1);
+			cmdHistory[cmdHistory.length - pos] = before + after;
+			cursorPos = cursorPos - 1;
+			before = cmdHistory[cmdHistory.length - pos].slice(0, cursorPos);
+			cc = cmdHistory[cmdHistory.length - pos][cursorPos];
+			after = cmdHistory[cmdHistory.length - pos].slice(cursorPos + 1, cmdHistory[cmdHistory.length - pos.length - 1]);
+			cmdHistory[cmdHistory.length - pos] = before + cc + after;
+			process.stdout.clearLine();
+			process.stdout.cursorTo(0);
+			process.stdout.write(workingDir.bold.white + "> ".white + before + cc.bgWhite.black + after);
+		} else {
+			cmdHistory[cmdHistory.length - pos] = cmdHistory[cmdHistory.length - pos].substring(0, cmdHistory[cmdHistory.length - pos].length - 1);
+			process.stdout.clearLine();
+			process.stdout.cursorTo(0);
+			process.stdout.write(workingDir.bold.white + "> ".white + cmdHistory[cmdHistory.length - pos]);
+			cursorPos = cmdHistory[cmdHistory.length - pos].length - 1;
 		}
 	} else if (key && key.ctrl && key.name == 'c') {
 		process.exit()
@@ -65,15 +120,31 @@ process.stdin.on("keypress", function (ch, key) {
 		}
 		if (pos == 1) cmdHistory[cmdHistory.length] = "";
 		pos = 1;
-
+		cursorPos = 0;
 	} else {
-		if (key != undefined) {
-			cmdHistory[cmdHistory.length - 1] += key.sequence;
+		if (cursorPos == cmdHistory[cmdHistory.length - pos].length - 1 || (cursorPos == 0 && cmdHistory[cmdHistory.length - pos] == 0)) {
+			if (key != undefined) cmdHistory[cmdHistory.length - pos] += key.sequence;
+			else cmdHistory[cmdHistory.length - pos] += ch;
+			process.stdout.clearLine();
+			process.stdout.cursorTo(0);
+			process.stdout.write(workingDir.bold.white + "> ".white + cmdHistory[cmdHistory.length - pos]);
+			cursorPos = cmdHistory[cmdHistory.length - pos].length - 1;
 		} else {
-			cmdHistory[cmdHistory.length - 1] += ch;
+			var add = "";
+			if (key != undefined) add = key.sequence;
+			else add = ch;
+			var before = cmdHistory[cmdHistory.length - pos].slice(0, cursorPos);
+			var after = cmdHistory[cmdHistory.length - pos].slice(cursorPos, cmdHistory[cmdHistory.length - pos.length - 1]);
+			before += add;
+			cmdHistory[cmdHistory.length - pos] = before + after;
+			cursorPos = cursorPos + 1;
+			before = cmdHistory[cmdHistory.length - pos].slice(0, cursorPos);
+			cc = cmdHistory[cmdHistory.length - pos][cursorPos];
+			after = cmdHistory[cmdHistory.length - pos].slice(cursorPos + 1, cmdHistory[cmdHistory.length - pos.length - 1]);
+			cmdHistory[cmdHistory.length - pos] = before + cc + after;
+			process.stdout.clearLine();
+			process.stdout.cursorTo(0);
+			process.stdout.write(workingDir.bold.white + "> ".white + before + cc.bgWhite.black + after);
 		}
-		process.stdout.clearLine();
-		process.stdout.cursorTo(0);
-		process.stdout.write(workingDir.bold.white + "> ".white + cmdHistory[cmdHistory.length - pos]);
 	}
 });
