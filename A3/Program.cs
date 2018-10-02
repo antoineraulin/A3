@@ -7,6 +7,8 @@ using System.IO;
 using System.Drawing.Imaging;
 using System.Windows.Forms;
 
+
+
 namespace A3
 {
     internal class Program
