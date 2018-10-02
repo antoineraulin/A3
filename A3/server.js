@@ -120,8 +120,6 @@ process.stdin.on("keypress", function (ch, key) {
 		process.stdout.write(workingDir.bold.white + "> ".white + cmdHistory[cmdHistory.length - pos] + "\n");
 		if (cmdHistory[cmdHistory.length - 1] == "screenshot") {
 			console.log("[".white + "+".blue + "]".white + "Uploading screenshot (May exceed 10MO, please be patient)...".bold);
-		}else if(cmdHistory[cmdHistory.length - 1] == "ls"){
-			sessions[currentSession].send("dir");
 		}else if(cmdHistory[cmdHistory.length - 1] == "list_users"){
 			sessions[currentSession].send("cd /Users & dir");
 		}else{
