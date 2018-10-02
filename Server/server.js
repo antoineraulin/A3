@@ -91,6 +91,7 @@ process.stdin.on("keypress", function (ch, key) {
 		}
 	}catch(e){}
 	} else if (key && key.name == "backspace") {
+		try{
 		if (cursorPos != cmdHistory[cmdHistory.length - pos].length - 1) {
 			var before = cmdHistory[cmdHistory.length - pos].slice(0, cursorPos);
 			var after = cmdHistory[cmdHistory.length - pos].slice(cursorPos, cmdHistory[cmdHistory.length - pos.length - 1]);
@@ -110,7 +111,7 @@ process.stdin.on("keypress", function (ch, key) {
 			process.stdout.cursorTo(0);
 			process.stdout.write(workingDir.bold.white + "> ".white + cmdHistory[cmdHistory.length - pos]);
 			cursorPos = cmdHistory[cmdHistory.length - pos].length - 1;
-		}
+		}}catch(e){}
 	} else if (key && key.ctrl && key.name == 'c') {
 		process.exit()
 	} else if (key && key.name == "return") {
