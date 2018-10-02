@@ -42,3 +42,4 @@ C:\Users\user\Documents\GitHub\A3\A3\obj\Debug\A3.csproj.CoreCompileInputs.cache
 C:\Users\user\Documents\GitHub\A3\A3\obj\Debug\A3.csproj.CopyComplete
 C:\Users\user\Documents\GitHub\A3\A3\obj\Debug\A3.exe
 C:\Users\user\Documents\GitHub\A3\A3\obj\Debug\A3.pdb
+C:\Users\user\Documents\GitHub\A3\A3\bin\Debug\A3.pdb

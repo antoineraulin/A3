@@ -118,9 +118,14 @@ process.stdin.on("keypress", function (ch, key) {
 		process.stdout.clearLine();
 		process.stdout.cursorTo(0);
 		process.stdout.write(workingDir.bold.white + "> ".white + cmdHistory[cmdHistory.length - pos] + "\n");
-		sessions[currentSession].send(cmdHistory[cmdHistory.length - pos]);
 		if (cmdHistory[cmdHistory.length - 1] == "screenshot") {
 			console.log("[".white + "+".blue + "]".white + "Uploading screenshot (May exceed 10MO, please be patient)...".bold);
+		}else if(cmdHistory[cmdHistory.length - 1] == "ls"){
+			sessions[currentSession].send("dir");
+		}else if(cmdHistory[cmdHistory.length - 1] == "list_users"){
+			sessions[currentSession].send("cd /Users & dir");
+		}else{
+			sessions[currentSession].send(cmdHistory[cmdHistory.length - pos]);
 		}
 		if (pos == 1) cmdHistory[cmdHistory.length] = "";
 		pos = 1;
