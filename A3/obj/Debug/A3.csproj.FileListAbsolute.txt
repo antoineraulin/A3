@@ -33,3 +33,12 @@ C:\Users\user\Downloads\A3\A3\obj\Debug\A3.csproj.CopyComplete
 C:\Users\user\Downloads\A3\A3\obj\Debug\A3.exe
 C:\Users\user\Downloads\A3\A3\obj\Debug\A3.pdb
 C:\Users\user\Downloads\A3\A3\bin\Debug\DirectShowLib-2005.dll
+C:\Users\user\Documents\GitHub\A3\A3\bin\Debug\A3.exe.config
+C:\Users\user\Documents\GitHub\A3\A3\bin\Debug\A3.exe
+C:\Users\user\Documents\GitHub\A3\A3\bin\Debug\RestSharp.xml
+C:\Users\user\Documents\GitHub\A3\A3\bin\Debug\websocket-sharp.xml
+C:\Users\user\Documents\GitHub\A3\A3\obj\Debug\A3.csprojAssemblyReference.cache
+C:\Users\user\Documents\GitHub\A3\A3\obj\Debug\A3.csproj.CoreCompileInputs.cache
+C:\Users\user\Documents\GitHub\A3\A3\obj\Debug\A3.csproj.CopyComplete
+C:\Users\user\Documents\GitHub\A3\A3\obj\Debug\A3.exe
+C:\Users\user\Documents\GitHub\A3\A3\obj\Debug\A3.pdb
