@@ -1,1 +1,0 @@
-currentSession = 0;
