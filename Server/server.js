@@ -42,7 +42,7 @@ wss.on('connection', function connection(ws) {
 });
 
 function suggestions(line) {
-	const completions = 'win_help help list_users screenshot download_url dir assoc at attrib bootcfg cd chdir chkdsk cls copy del dir diskpart driverquery echo exit fc find findstr for fsutil ftype getmac goto if ipconfig md mkdir more move net netsh netstat path pathping pause ping popd pushd powercfg reg rd rmdir ren rename sc schtasks set sfc shutdown sort start subst systeminfo taskkill tasklist tree type vssadmin xcopy'.split(' ');
+	const completions = 'win_help exit help list_users screenshot download_url dir assoc at attrib bootcfg cd chdir chkdsk cls copy del dir diskpart driverquery echo exit fc find findstr for fsutil ftype getmac goto if ipconfig md mkdir more move net netsh netstat path pathping pause ping popd pushd powercfg reg rd rmdir ren rename sc schtasks set sfc shutdown sort start subst systeminfo taskkill tasklist tree type vssadmin xcopy'.split(' ');
 	const hits = completions.filter((c) => c.startsWith(line));
 	return [hits.length ? hits : completions, line];
 }
@@ -73,12 +73,15 @@ rl.on('line', (line) => {
 		rl.prompt();
 	}else if(msg == "win_help"){
 		sessions[currentSession].send("help");
+	}else if(msg == "exit"){
+		console.log('Have a great day! A3 over.');
+	process.exit(0);
 	}else{
 		sessions[currentSession].send(msg);
 	}
 }).on('close', () => {
-	console.log('Have a great day! A3 over.');
-	process.exit(0);
+	console.log("the request was cancelled. If you want to leave the console, type the command exit.")
+	rl.prompt();
 });
 
 function ValidURL(str) {
