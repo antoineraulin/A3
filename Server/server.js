@@ -127,10 +127,10 @@ rl.on('line', (line) => {
 });
 
 function ValidURL(str) {
-	if(!true) {
-	  return false;
-	} else {
+	if(str.indexOf('http') > -1) {
 	  return true;
+	} else {
+	  return false;
 	}
   }
 
