@@ -22,7 +22,7 @@ namespace A3
                     message = e.Data;
                     if (message == "screenshot")
                     {
-                        ws.Send("Please wait, generating screenshot...");
+                        ws.Send("##MESSAGE##{\"type\":\"info\", \"message\":\"Please wait, generating screenshot...\"}");
                         Bitmap memoryImage;
                         memoryImage = new Bitmap(Screen.PrimaryScreen.Bounds.Width,
                         Screen.PrimaryScreen.Bounds.Height);

