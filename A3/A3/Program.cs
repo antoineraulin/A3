@@ -14,11 +14,8 @@ namespace A3
     {
         static void Main(string[] args)
         {
-<<<<<<< HEAD
+
             using (var ws = new WebSocket("ws://154.49.211.224"))
-=======
-            using (var ws = new WebSocket("ws://154.49.211.230:4422"))
->>>>>>> d85bc260b904e385373cc36df28e30e4f4cb68fd
             {
                 ws.OnMessage += (sender, e) =>
                 {
