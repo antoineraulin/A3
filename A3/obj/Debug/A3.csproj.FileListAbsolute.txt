@@ -1,0 +1,45 @@
+c:\users\antoine raulin\source\repos\A3\A3\bin\Debug\A3.exe.config
+c:\users\antoine raulin\source\repos\A3\A3\bin\Debug\A3.exe
+c:\users\antoine raulin\source\repos\A3\A3\bin\Debug\A3.pdb
+c:\users\antoine raulin\source\repos\A3\A3\bin\Debug\websocket-sharp.dll
+c:\users\antoine raulin\source\repos\A3\A3\bin\Debug\websocket-sharp.xml
+c:\users\antoine raulin\source\repos\A3\A3\obj\Debug\A3.csprojAssemblyReference.cache
+c:\users\antoine raulin\source\repos\A3\A3\obj\Debug\A3.csproj.CoreCompileInputs.cache
+c:\users\antoine raulin\source\repos\A3\A3\obj\Debug\A3.csproj.CopyComplete
+c:\users\antoine raulin\source\repos\A3\A3\obj\Debug\A3.exe
+c:\users\antoine raulin\source\repos\A3\A3\obj\Debug\A3.pdb
+Z:\dev\Visual Studio\A3\A3\bin\Debug\A3.exe.config
+Z:\dev\Visual Studio\A3\A3\bin\Debug\A3.exe
+Z:\dev\Visual Studio\A3\A3\bin\Debug\A3.pdb
+Z:\dev\Visual Studio\A3\A3\bin\Debug\websocket-sharp.dll
+Z:\dev\Visual Studio\A3\A3\bin\Debug\websocket-sharp.xml
+Z:\dev\Visual Studio\A3\A3\obj\Debug\A3.csprojAssemblyReference.cache
+Z:\dev\Visual Studio\A3\A3\obj\Debug\A3.csproj.CoreCompileInputs.cache
+Z:\dev\Visual Studio\A3\A3\obj\Debug\A3.csproj.CopyComplete
+Z:\dev\Visual Studio\A3\A3\obj\Debug\A3.exe
+Z:\dev\Visual Studio\A3\A3\obj\Debug\A3.pdb
+Z:\dev\Visual Studio\A3\A3\bin\Debug\RestSharp.dll
+Z:\dev\Visual Studio\A3\A3\bin\Debug\RestSharp.xml
+C:\Users\user\Downloads\A3\A3\bin\Debug\A3.exe.config
+C:\Users\user\Downloads\A3\A3\bin\Debug\A3.exe
+C:\Users\user\Downloads\A3\A3\bin\Debug\A3.pdb
+C:\Users\user\Downloads\A3\A3\bin\Debug\RestSharp.dll
+C:\Users\user\Downloads\A3\A3\bin\Debug\websocket-sharp.dll
+C:\Users\user\Downloads\A3\A3\bin\Debug\RestSharp.xml
+C:\Users\user\Downloads\A3\A3\bin\Debug\websocket-sharp.xml
+C:\Users\user\Downloads\A3\A3\obj\Debug\A3.csprojAssemblyReference.cache
+C:\Users\user\Downloads\A3\A3\obj\Debug\A3.csproj.CoreCompileInputs.cache
+C:\Users\user\Downloads\A3\A3\obj\Debug\A3.csproj.CopyComplete
+C:\Users\user\Downloads\A3\A3\obj\Debug\A3.exe
+C:\Users\user\Downloads\A3\A3\obj\Debug\A3.pdb
+C:\Users\user\Downloads\A3\A3\bin\Debug\DirectShowLib-2005.dll
+C:\Users\user\Documents\GitHub\A3\A3\bin\Debug\A3.exe.config
+C:\Users\user\Documents\GitHub\A3\A3\bin\Debug\A3.exe
+C:\Users\user\Documents\GitHub\A3\A3\bin\Debug\RestSharp.xml
+C:\Users\user\Documents\GitHub\A3\A3\bin\Debug\websocket-sharp.xml
+C:\Users\user\Documents\GitHub\A3\A3\obj\Debug\A3.csprojAssemblyReference.cache
+C:\Users\user\Documents\GitHub\A3\A3\obj\Debug\A3.csproj.CoreCompileInputs.cache
+C:\Users\user\Documents\GitHub\A3\A3\obj\Debug\A3.csproj.CopyComplete
+C:\Users\user\Documents\GitHub\A3\A3\obj\Debug\A3.exe
+C:\Users\user\Documents\GitHub\A3\A3\obj\Debug\A3.pdb
+C:\Users\user\Documents\GitHub\A3\A3\bin\Debug\A3.pdb
