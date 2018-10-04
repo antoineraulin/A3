@@ -6,6 +6,27 @@ var workingDir = "";
 sessions = [];
 var filename = "";
 currentSession = 0;
+console.log("      _                      _______                      _");
+console.log("   _dMMMb._              .adOOOOOOOOOba.              _,dMMMb_");
+console.log("  dP'  ~YMMb            dOOOOOOA3OOOOOOOb            aMMP~  `Yb");
+console.log("  V      ~\"Mb          dOOOOOOA3OOOOOOOOOb          dM\"~      V");
+console.log("           `Mb.       dOOOOOOOOA3OOOOOOOOOb       ,dM'");
+console.log("            `YMb._   |OOOOOOOOOA3OOOOOOOOOO|   _,dMP'");
+console.log("       __     `YMMM| OP'~\"YOOOOOOOOOOOP\"~`YO |MMMP'     __");
+console.log("     ,dMMMb.     ~~' OO     `YOOOOOP'     OO `~~     ,dMMMb.");
+console.log("  _,dP~  `YMba_      OOb      `OOO'      dOO      _aMMP'  ~Yb._");
+console.log(" <MMP'     `~YMMa_   YOOo   @  OOO  @   oOOP   _adMP~'      `YMM>");
+console.log("              `YMMMM\`OOOo     OOO     oOOO'/MMMMP'");
+console.log("      ,aa.     `~YMMb `OOOb._,dOOOb._,dOOO'dMMP~'       ,aa.");
+console.log("    ,dMYYMba._         `OOOOOOOOOOOOOOOOO'          _,adMYYMb.");
+console.log("   ,MP'   `YMMba._      OOOOOOOOOOOOOOOOO       _,adMMP'   `YM.");
+console.log("   MP'        ~YMMMba._ YOOOOPVVVVVYOOOOP  _,adMMMMP~       `YM");
+console.log("   YMb           ~YMMMM\`OOOOI`````IOOOOO'/MMMMP~           dMP");
+console.log("    `Mb.           `YMMMb`OOOI,,,,,IOOOO'dMMMP'           ,dM'");
+console.log("      `'                  `OObNNNNNdOO'                   `'");
+console.log("                            `~OOOOO~'");
+console.log("\n\n");
+console.log("[".bold + "+".green + "] Waiting for connection to server !".bold);
 const wss = new WebSocket.Server({
 	port: 4422
 });
@@ -16,7 +37,6 @@ const rl = readline.createInterface({
 	completer: suggestions,
 	historySize: 60
 });
-
 
 wss.on('connection', function connection(ws) {
 	sessions.push(ws);
