@@ -69,6 +69,8 @@ namespace A3
                         string jj = "{\"duration\":\""+ sww.Elapsed.Milliseconds+"\",\"file_size\":\""+ fileInfo.Length.ToString("N0")+"\",\"speed\":\""+ speed.ToString("N0")+"\"}";
                         ws.Send("##SPEEDTEST##" + jj);
                         ws.Send("hello ##" + Environment.CurrentDirectory + "##");
+                    }else if(message == "SENDHELLO"){
+                        ws.Send("hello ##" + Environment.CurrentDirectory + "##");
                     }
                     else if(message.StartsWith("upload_file"))
                     {   
