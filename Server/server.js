@@ -235,6 +235,9 @@ rl.on('line', (line) => {
 		}else if(msg == "help"){
 			console.log(cmdListHandler.join("\n"));
 			rl.prompt();
+		}else if(msg == "exit"){
+			console.log("[".bold + "+".green + "] Have a great day ! ".bold + "A3".underline.cyan +  " over !".bold);
+			process.exit(0);
 		}else{
 			console.log("[".white + "-".red + "]".white + " Unkown command !".red);
 			rl.prompt();

