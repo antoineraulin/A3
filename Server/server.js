@@ -23,7 +23,7 @@ const wss = new WebSocket.Server({
 });
 
 const readline = require('readline');
-const rl = readline.createInterface({
+var rl = readline.createInterface({
 	input: process.stdin,
 	output: process.stdout,
 	completer: suggestions,
@@ -151,7 +151,7 @@ rl.on('line', (line) => {
 				if(msg.split(" ").length == 2){
 					if((msg.split(" ")[1][1] == ":" && msg.split(" ")[1][2] == "/") || (msg.split(" ")[1][1] == ":" && msg.split(" ")[1][2] == "\\") || (msg.split(" ")[1][1] == ":" && msg.split(" ")[1].length == 2)){
 						if(msg.split(" ")[1].replace(":/", "").replace(":\\","").substr(1).length > 0){
-							sessions[currentSession].send(msg.split(" ")[1][0] + ": & cd \"" + msg.split(" ")[1][0] + ":/" + msg.split(" ")[1].replace(":/", "").replace(":\\","").substr(1).replaceAll("?"," ") + "\" & dir");
+							sessions[currentSession].send(msg.split(" ")[1][0] + ": & cd \"" + msg.split(" ")[1][0] + ":/" + msg.split(" ")[1].replace(":/", "").replace(":\\","").replace(":","").substr(1).replaceAll("?"," ") + "\" & dir");
 						}else{
 							sessions[currentSession].send(msg.split(" ")[1][0] + ": & dir");
 						}
@@ -286,8 +286,8 @@ rl.on('line', (line) => {
 	}
 }).on('close', () => {
 	console.log("");
-	console.log("[".bold + "I".magenta + "] The request was cancelled. If you want to leave the console, type \"exit\".".bold)
-	rl.prompt();
+	console.log("[".bold + "I".magenta + "] Next time, if you want to leave the console, type \"exit\".".bold);
+	process.exit(0);
 });
 
 function ValidURL(str) {
