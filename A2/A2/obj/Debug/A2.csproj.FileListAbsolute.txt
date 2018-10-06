@@ -7,3 +7,12 @@ Z:\dev\Visual Studio\A2\A2\obj\Debug\A2.exe
 Z:\dev\Visual Studio\A2\A2\obj\Debug\A2.pdb
 Z:\dev\Visual Studio\A2\A2\obj\Debug\Interop.IWshRuntimeLibrary.dll
 Z:\dev\Visual Studio\A2\A2\obj\Debug\A2.csproj.ResolveComReference.cache
+C:\Users\user\Documents\GitHub\A3\A2\A2\obj\Debug\A2.csprojAssemblyReference.cache
+C:\Users\user\Documents\GitHub\A3\A2\A2\obj\Debug\Interop.IWshRuntimeLibrary.dll
+C:\Users\user\Documents\GitHub\A3\A2\A2\obj\Debug\A2.csproj.ResolveComReference.cache
+C:\Users\user\Documents\GitHub\A3\A2\A2\obj\Debug\A2.csproj.CoreCompileInputs.cache
+C:\Users\user\Documents\GitHub\A3\A2\A2\obj\Debug\A2.exe
+C:\Users\user\Documents\GitHub\A3\A2\A2\obj\Debug\A2.pdb
+C:\Users\user\Documents\GitHub\A3\A2\A2\bin\Debug\A2.exe.config
+C:\Users\user\Documents\GitHub\A3\A2\A2\bin\Debug\A2.exe
+C:\Users\user\Documents\GitHub\A3\A2\A2\bin\Debug\A2.pdb
