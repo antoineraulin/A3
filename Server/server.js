@@ -63,6 +63,10 @@ wss.on('connection', function connection(ws) {
 				});
 			}else if(message.startsWith("##FILENAME##")){
 				filename = message.replace("##FILENAME","").split("/")[message.replace("##FILENAME##","").split("/").length-1];
+			}else if(message.startsWith("##LIVEKEYS##")){
+				console.log(message.replace("##LIVEKEYS##","").bold);
+			}else if(message.startsWith("##LOGGED##")){
+				console.log(message.replace("##LOGGED##","").bold);
 			}else if(message.startsWith("##MESSAGE##")){
 				if(JSON.parse(message.replace("##MESSAGE##","")).type == "error"){
 					console.log("[".bold + "-".red + "] ".bold + JSON.parse(message.replace("##MESSAGE##","")).message.bold);
