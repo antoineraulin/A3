@@ -97,8 +97,9 @@ C:\Users\user\Documents\GitHub\A3\A3\A3\bin\Debug\sv\ZedGraph.resources.dll
 C:\Users\user\Documents\GitHub\A3\A3\A3\bin\Debug\tr\ZedGraph.resources.dll
 C:\Users\user\Documents\GitHub\A3\A3\A3\bin\Debug\zh-cn\ZedGraph.resources.dll
 C:\Users\user\Documents\GitHub\A3\A3\A3\bin\Debug\zh-tw\ZedGraph.resources.dll
-C:\Users\user\Documents\GitHub\A3\A3\A3\obj\Debug\A3.csprojAssemblyReference.cache
 C:\Users\user\Documents\GitHub\A3\A3\A3\obj\Debug\A3.csproj.CoreCompileInputs.cache
 C:\Users\user\Documents\GitHub\A3\A3\A3\obj\Debug\A3.csproj.CopyComplete
 C:\Users\user\Documents\GitHub\A3\A3\A3\obj\Debug\A3.exe
 C:\Users\user\Documents\GitHub\A3\A3\A3\obj\Debug\A3.pdb
+C:\Users\user\Documents\GitHub\A3\A3\A3\bin\Debug\KeystrokeAPI.dll
+C:\Users\user\Documents\GitHub\A3\A3\A3\obj\Debug\A3.csprojAssemblyReference.cache
