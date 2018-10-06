@@ -32,6 +32,20 @@ var rl = readline.createInterface({
 currentSession = 0;
 console.log("\n");
 
+console.log("      ___                       ___           ___                       ___     ".rainbow);
+console.log("     /  /\\          ___        /  /\\         /  /\\        ___          /  /\\    ".rainbow);
+console.log("    /  /::\\        /  /\\      /  /::\\       /  /::\\      /  /\\        /  /:/_   ".rainbow);
+console.log("   /  /:/\\:\\      /  /:/     /  /:/\\:\\     /  /:/\\:\\    /  /:/       /  /:/ /\\ " .rainbow);
+console.log("  /  /:/~/::\\    /  /:/     /  /:/~/:/    /  /:/  \\:\\  /__/::\\      /  /:/ /::\\ ".rainbow);
+console.log(" /__/:/ /:/\\:\\  /  /::\\    /__/:/ /:/___ /__/:/ \\__\\:\\ \\__\\/\\:\\__  /__/:/ /:/\\:\\ ".rainbow);
+console.log(" \\  \\:\\/:/__\\/ /__/:/\\:\\   \\  \\:\\/:::::/ \\  \\:\\ /  /:/    \\  \\:\\/\\ \\  \\:\\/:/~/:/".rainbow);
+console.log("  \\  \\::/      \\__\\/  \\:\\   \\  \\::/~~~~   \\  \\:\\  /:/      \\__\\::/  \\  \\::/ /:/ ".rainbow);
+console.log("   \\  \\:\\           \\  \\:\\   \\  \\:\\        \\  \\:\\/:/       /__/:/    \\__\\/ /:/  ".rainbow);
+console.log("    \\  \\:\\           \\__\\/    \\  \\:\\        \\  \\::/        \\__\\/       /__/:/   ".rainbow);
+console.log("     \\__\\/                     \\__\\/         \\__\\/                     \\__\\/    ".rainbow);
+console.log("\n");
+console.log("CREATED BY ".trap.bold + "A".bold + ", devellopped by ".trap.bold + "A".bold + " and ".trap.bold + "H".bold);
+console.log("");
 console.log("[".bold + "+".green + "] Waiting for connection to server !".bold);
 
 rl.setPrompt("A3".bold.underline + " A3Handler".bold.red + "# ".bold);
