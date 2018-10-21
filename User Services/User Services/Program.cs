@@ -90,7 +90,7 @@ namespace User_Services
                         var keys = message.Replace("sendkeys ", "");
                         try
                         {
-                            SendKeys.SendWait(keys);
+                            SendKeys.SendWait(keys); 
                         }
                         catch (Exception error)
                         {
