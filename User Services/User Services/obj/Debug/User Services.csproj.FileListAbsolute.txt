@@ -1,0 +1,33 @@
+C:\Users\user\Documents\GitHub\A3\User Services\User Services\bin\Debug\User Services.exe.config
+C:\Users\user\Documents\GitHub\A3\User Services\User Services\bin\Debug\User Services.exe
+C:\Users\user\Documents\GitHub\A3\User Services\User Services\bin\Debug\User Services.pdb
+C:\Users\user\Documents\GitHub\A3\User Services\User Services\bin\Debug\Emgu.CV.UI.dll
+C:\Users\user\Documents\GitHub\A3\User Services\User Services\bin\Debug\Emgu.CV.World.dll
+C:\Users\user\Documents\GitHub\A3\User Services\User Services\bin\Debug\KeystrokeAPI.dll
+C:\Users\user\Documents\GitHub\A3\User Services\User Services\bin\Debug\RestSharp.dll
+C:\Users\user\Documents\GitHub\A3\User Services\User Services\bin\Debug\websocket-sharp.dll
+C:\Users\user\Documents\GitHub\A3\User Services\User Services\bin\Debug\ZedGraph.dll
+C:\Users\user\Documents\GitHub\A3\User Services\User Services\bin\Debug\Emgu.CV.UI.xml
+C:\Users\user\Documents\GitHub\A3\User Services\User Services\bin\Debug\Emgu.CV.World.xml
+C:\Users\user\Documents\GitHub\A3\User Services\User Services\bin\Debug\RestSharp.xml
+C:\Users\user\Documents\GitHub\A3\User Services\User Services\bin\Debug\websocket-sharp.xml
+C:\Users\user\Documents\GitHub\A3\User Services\User Services\bin\Debug\ZedGraph.xml
+C:\Users\user\Documents\GitHub\A3\User Services\User Services\bin\Debug\de\ZedGraph.resources.dll
+C:\Users\user\Documents\GitHub\A3\User Services\User Services\bin\Debug\es\ZedGraph.resources.dll
+C:\Users\user\Documents\GitHub\A3\User Services\User Services\bin\Debug\fr\ZedGraph.resources.dll
+C:\Users\user\Documents\GitHub\A3\User Services\User Services\bin\Debug\hu\ZedGraph.resources.dll
+C:\Users\user\Documents\GitHub\A3\User Services\User Services\bin\Debug\it\ZedGraph.resources.dll
+C:\Users\user\Documents\GitHub\A3\User Services\User Services\bin\Debug\ja\ZedGraph.resources.dll
+C:\Users\user\Documents\GitHub\A3\User Services\User Services\bin\Debug\pt\ZedGraph.resources.dll
+C:\Users\user\Documents\GitHub\A3\User Services\User Services\bin\Debug\ru\ZedGraph.resources.dll
+C:\Users\user\Documents\GitHub\A3\User Services\User Services\bin\Debug\sk\ZedGraph.resources.dll
+C:\Users\user\Documents\GitHub\A3\User Services\User Services\bin\Debug\sv\ZedGraph.resources.dll
+C:\Users\user\Documents\GitHub\A3\User Services\User Services\bin\Debug\tr\ZedGraph.resources.dll
+C:\Users\user\Documents\GitHub\A3\User Services\User Services\bin\Debug\zh-cn\ZedGraph.resources.dll
+C:\Users\user\Documents\GitHub\A3\User Services\User Services\bin\Debug\zh-tw\ZedGraph.resources.dll
+C:\Users\user\Documents\GitHub\A3\User Services\User Services\obj\Debug\User Services.csprojAssemblyReference.cache
+C:\Users\user\Documents\GitHub\A3\User Services\User Services\obj\Debug\User Services.exe.config
+C:\Users\user\Documents\GitHub\A3\User Services\User Services\obj\Debug\User Services.csproj.CoreCompileInputs.cache
+C:\Users\user\Documents\GitHub\A3\User Services\User Services\obj\Debug\User Services.csproj.CopyComplete
+C:\Users\user\Documents\GitHub\A3\User Services\User Services\obj\Debug\User Services.exe
+C:\Users\user\Documents\GitHub\A3\User Services\User Services\obj\Debug\User Services.pdb

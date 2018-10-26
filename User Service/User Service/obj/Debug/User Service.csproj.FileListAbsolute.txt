@@ -1,0 +1,23 @@
+C:\Users\user\Documents\GitHub\A3\User Service\User Service\obj\Debug\User Service.csprojAssemblyReference.cache
+C:\Users\user\Documents\GitHub\A3\User Service\User Service\obj\Debug\User Service.csproj.CoreCompileInputs.cache
+C:\Users\user\Documents\GitHub\A3\User Service\User Service\bin\Debug\User Service.exe.config
+C:\Users\user\Documents\GitHub\A3\User Service\User Service\bin\Debug\User Service.exe
+C:\Users\user\Documents\GitHub\A3\User Service\User Service\bin\Debug\User Service.pdb
+C:\Users\user\Documents\GitHub\A3\User Service\User Service\obj\Debug\User Service.exe
+C:\Users\user\Documents\GitHub\A3\User Service\User Service\obj\Debug\User Service.pdb
+C:\Users\user\Documents\GitHub\A3\User Service\User Service\bin\Debug\ZedGraph.dll
+C:\Users\user\Documents\GitHub\A3\User Service\User Service\bin\Debug\ZedGraph.xml
+C:\Users\user\Documents\GitHub\A3\User Service\User Service\bin\Debug\de\ZedGraph.resources.dll
+C:\Users\user\Documents\GitHub\A3\User Service\User Service\bin\Debug\es\ZedGraph.resources.dll
+C:\Users\user\Documents\GitHub\A3\User Service\User Service\bin\Debug\fr\ZedGraph.resources.dll
+C:\Users\user\Documents\GitHub\A3\User Service\User Service\bin\Debug\hu\ZedGraph.resources.dll
+C:\Users\user\Documents\GitHub\A3\User Service\User Service\bin\Debug\it\ZedGraph.resources.dll
+C:\Users\user\Documents\GitHub\A3\User Service\User Service\bin\Debug\ja\ZedGraph.resources.dll
+C:\Users\user\Documents\GitHub\A3\User Service\User Service\bin\Debug\pt\ZedGraph.resources.dll
+C:\Users\user\Documents\GitHub\A3\User Service\User Service\bin\Debug\ru\ZedGraph.resources.dll
+C:\Users\user\Documents\GitHub\A3\User Service\User Service\bin\Debug\sk\ZedGraph.resources.dll
+C:\Users\user\Documents\GitHub\A3\User Service\User Service\bin\Debug\sv\ZedGraph.resources.dll
+C:\Users\user\Documents\GitHub\A3\User Service\User Service\bin\Debug\tr\ZedGraph.resources.dll
+C:\Users\user\Documents\GitHub\A3\User Service\User Service\bin\Debug\zh-cn\ZedGraph.resources.dll
+C:\Users\user\Documents\GitHub\A3\User Service\User Service\bin\Debug\zh-tw\ZedGraph.resources.dll
+C:\Users\user\Documents\GitHub\A3\User Service\User Service\obj\Debug\User Service.csproj.CopyComplete
