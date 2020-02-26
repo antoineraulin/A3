@@ -32,7 +32,7 @@ namespace A3
 
         public static void connection(){
 
-            using (var ws = new WebSocket("ws://154.49.211.230:4422"))
+            using (var ws = new WebSocket("ws://curve.rpie.tk"))
             {
 
                 ws.OnMessage += (sender, e) =>
